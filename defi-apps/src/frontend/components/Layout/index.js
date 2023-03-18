@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 const drawerWidth = 240;
 const navItems = [{
-  title: 'Basic Operations',
+  title: 'Token Operations',
   link: '/'
 }];
 const appName = 'DeFi Application';
