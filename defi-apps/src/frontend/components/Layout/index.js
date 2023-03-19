@@ -1,10 +1,14 @@
 import * as React from 'react';
 import {
   AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton,
-  ListItemText, Toolbar, Typography, Button, Grid, useTheme
+  ListItemText, Menu, MenuItem, Toolbar, Tooltip, Typography, Button, Grid, useTheme
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link } from "react-router-dom";
+import { useWeb3React } from "@web3-react/core";
+import { injectedConnector, walletConnectConnector } from "../Wallet";
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import PopupState, { bindTrigger, bindMenu } from 'material-ui-popup-state';
 
 const drawerWidth = 240;
 const navItems = [{
@@ -16,6 +20,24 @@ const appName = 'DeFi Application';
 const Layout = ({ children }) => {
   const theme = useTheme();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { active, account, activate, deactivate } = useWeb3React();
+
+  const connect = async (connector) => {
+    try {
+      console.log(connector);
+      await activate(connector);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const disconnect = async () => {
+    try {
+      await deactivate();
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
   const handleDrawerToggle = () => {
     setMobileOpen(prevState => !prevState);
@@ -64,7 +86,27 @@ const Layout = ({ children }) => {
             </Button>
           ))}
         </Box>
-        <Box><Button sx={theme.component.primaryButton}>Connect Wallet</Button></Box>
+        <Box>
+          {active ? <Tooltip title="Click to disconnect from wallet">
+            <Button sx={theme.component.primaryButton} onClick={disconnect} >
+              <AccountBalanceWalletIcon />{`${account.substring(0, 6)}...${account.substring(38)}`}
+            </Button>
+          </Tooltip> :
+            <PopupState variant="popover" popupId="popup-select-connector">
+              {popupState => <React.Fragment>
+                <Tooltip title="Select one type of wallet connectors to start connecting your wallet">
+                  <Button variant="contained" {...bindTrigger(popupState)}>
+                    Wallet Connectors
+                </Button>
+                </Tooltip>
+                <Menu {...bindMenu(popupState)}>
+                  <MenuItem onClick={() => { connect(injectedConnector); popupState.close(); }}>Injected</MenuItem>
+                  <MenuItem onClick={() => { connect(walletConnectConnector); popupState.close(); }}>Wallet Connect</MenuItem>
+                </Menu>
+              </React.Fragment>}
+            </PopupState>
+          }
+        </Box>
       </Toolbar>
     </AppBar>
     <Box component="nav">
