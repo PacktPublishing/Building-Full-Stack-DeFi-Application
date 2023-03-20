@@ -24,7 +24,6 @@ const Layout = ({ children }) => {
 
   const connect = async (connector) => {
     try {
-      console.log(connector);
       await activate(connector);
     } catch (error) {
       console.error(error);
