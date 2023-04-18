@@ -31,9 +31,9 @@ interface ITokenPair {
         external
         view
         returns (
-            uint112 reserve0,
-            uint112 reserve1,
-            uint32 blockTimestampLast
+            uint256 reserve0,
+            uint256 reserve1,
+            uint256 blockTimestampLast
         );
 
     function mint(address to) external returns (uint256 liquidity);
