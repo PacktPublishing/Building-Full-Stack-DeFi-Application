@@ -25,6 +25,8 @@ interface ITokenPair {
 
     function token1() external view returns (address);
 
+    function kLast() external view returns (uint256);
+
     function getReserves()
         external
         view
@@ -33,8 +35,6 @@ interface ITokenPair {
             uint112 reserve1,
             uint32 blockTimestampLast
         );
-
-    function kLast() external view returns (uint256);
 
     function mint(address to) external returns (uint256 liquidity);
 
