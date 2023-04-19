@@ -17,7 +17,7 @@ interface ITokenPair {
         uint256 amount1Out,
         address indexed to
     );
-    event Sync(uint112 reserve0, uint112 reserve1);
+    event Sync(uint256 reserve0, uint256 reserve1);
 
     function factory() external view returns (address);
 
@@ -31,9 +31,9 @@ interface ITokenPair {
         external
         view
         returns (
-            uint112 reserve0,
-            uint112 reserve1,
-            uint32 blockTimestampLast
+            uint256 reserve0,
+            uint256 reserve1,
+            uint256 blockTimestampLast
         );
 
     function mint(address to) external returns (uint256 liquidity);
