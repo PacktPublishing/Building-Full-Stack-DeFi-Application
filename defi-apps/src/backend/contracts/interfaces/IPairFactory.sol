@@ -9,9 +9,9 @@ interface IPairFactory {
         uint256
     );
 
-    function feeTo() external view returns (address);
+    function rewardTo() external view returns (address);
 
-    function feeToSetter() external view returns (address);
+    function rewardToSetter() external view returns (address);
 
     function getPair(address tokenA, address tokenB)
         external
@@ -26,9 +26,9 @@ interface IPairFactory {
         external
         returns (address pair);
 
-    function setFeeTo(address) external;
+    function setRewardTo(address) external;
 
-    function setFeeToSetter(address) external;
+    function setRewardToSetter(address) external;
 
     function INIT_CODE_PAIR_HASH() external view returns (bytes32);
 }
