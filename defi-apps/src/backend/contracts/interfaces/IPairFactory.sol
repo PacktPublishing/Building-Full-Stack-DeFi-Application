@@ -3,8 +3,8 @@ pragma solidity ^0.8.0;
 
 interface IPairFactory {
     event PairCreated(
-        address indexed token0,
-        address indexed token1,
+        address indexed tokenA,
+        address indexed tokenB,
         address pair,
         uint256
     );
