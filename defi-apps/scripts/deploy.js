@@ -9,13 +9,30 @@ const fs = require("fs");
 
 async function main() {
   const [deployer] = await ethers.getSigners();
-  const tokenContractFactory = await ethers.getContractFactory("SimpleDeFiToken");
-  const token = await tokenContractFactory.deploy();
-  console.log("Simple DeFi Token Contract Address: ", token.address);
+
+  const contractList = [
+    // "Contract Name", "Contract Factory Name"
+    ["Simple DeFi Token", "SimpleDeFiToken"],
+    ["Meme Token", "MemeToken"],
+    ["Pair Factory", "PairFactory"],
+    ["AMM Router", "AMMRouter"], // AMMRouter must come after PairFactory
+  ];
+
+  let pairFactoryAddress;
+
+  // Deploying the smart contracts and save contracts to frontend
+  for (const [name, factory] of contractList) {
+    let contractFactory = await ethers.getContractFactory(factory);
+    let contract = factory === "AMMRouter" ? await contractFactory.deploy(pairFactoryAddress) : await contractFactory.deploy();
+    console.log(`${name} Contract Address:`, contract.address);
+    if (factory === "PairFactory") {
+      pairFactoryAddress = contract.address;
+    }
+    saveContractToFrontend(contract, factory);
+  }
+
   console.log("Deployer: ", deployer.address);
   console.log("Deployer ETH balance: ", (await deployer.getBalance()).toString());
-
-  saveContractToFrontend(token, 'SimpleDeFiToken');
 }
 
 function saveContractToFrontend(contract, name) {

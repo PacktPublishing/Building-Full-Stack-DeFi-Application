@@ -3,15 +3,13 @@ pragma solidity ^0.8.0;
 
 interface IPairFactory {
     event PairCreated(
-        address indexed token0,
-        address indexed token1,
+        address indexed tokenA,
+        address indexed tokenB,
         address pair,
         uint256
     );
 
     function rewardTo() external view returns (address);
-
-    function rewardToSetter() external view returns (address);
 
     function getPair(address tokenA, address tokenB)
         external
@@ -27,8 +25,6 @@ interface IPairFactory {
         returns (address pair);
 
     function setRewardTo(address) external;
-
-    function setRewardToSetter(address) external;
 
     function INIT_CODE_PAIR_HASH() external view returns (bytes32);
 }
