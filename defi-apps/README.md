@@ -58,3 +58,5 @@ Start React Web UI:
 ```shell
 npm start
 ```
+
+**Enjoy the exploration!**
