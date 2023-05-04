@@ -12,9 +12,9 @@ const TokenOperations = () => {
   const { active, account, library } = useWeb3React();
   const [totalSupply, setTotalSupply] = useState(0);
   const [yourBalance, setYourBalance] = useState(0);
-  const [addressNormal, setAddressNormal] = useState('0x');
+  const [addressNormal, setAddressNormal] = useState('');
   const [amountNormal, setAmountNormal] = useState(0);
-  const [addressBurn, setAddressBurn] = useState('0x');
+  const [addressBurn, setAddressBurn] = useState('');
   const [amountBurn, setAmountBurn] = useState(0);
 
   const getTotalSupply = useCallback(async () => {
@@ -65,10 +65,10 @@ const TokenOperations = () => {
       await tx.wait();
       toast.info(`Transaction Succeeded! TxHash: ${tx.hash}`);
       if (autoBurn) {
-        setAddressBurn('0x');
+        setAddressBurn('');
         setAmountBurn(0);
       } else {
-        setAddressNormal('0x');
+        setAddressNormal('');
         setAmountNormal(0);
       }
       getTotalSupply();
