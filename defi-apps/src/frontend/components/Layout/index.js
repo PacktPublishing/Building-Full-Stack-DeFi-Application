@@ -14,6 +14,9 @@ const drawerWidth = 240;
 const navItems = [{
   title: 'Token Operations',
   link: '/'
+}, {
+  title: 'Liquidity',
+  link: '/liquidity'
 }];
 const appName = 'DeFi Application';
 
@@ -48,8 +51,8 @@ const Layout = ({ children }) => {
       </Typography>
       <Divider />
       <List>
-        {navItems.map((item) => (
-          <ListItem key={item} disablePadding component={Link} to={item.link}>
+        {navItems.map((item, index) => (
+          <ListItem key={`menu-item-${index}`} disablePadding component={Link} to={item.link}>
             <ListItemButton sx={{ textAlign: 'center' }}>
               <ListItemText primary={item.title} />
             </ListItemButton>
@@ -79,8 +82,8 @@ const Layout = ({ children }) => {
           {appName}
         </Typography>
         <Box sx={theme.layout.menuBar}>
-          {navItems.map((item) => (
-            <Button key={item} sx={theme.component.menuButton} component={Link} to={item.link}>
+          {navItems.map((item, index) => (
+            <Button key={`menu-${index}`} sx={theme.component.menuButton} component={Link} to={item.link}>
               {item.title}
             </Button>
           ))}

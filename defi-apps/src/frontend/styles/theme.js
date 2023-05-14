@@ -28,9 +28,19 @@ export const theme = createTheme({
       border: "1px solid #fff",
       color: '#fff',
       backgroundColor: '#1976d2',
+      height: '50px',
       "&:hover": {
         backgroundColor: '#333',
       }
-    }
+    },
+    selectButton: {
+      minWidth: 'max-content',
+      textTransform: 'none',
+      height: '50px',
+      border: "1px solid #1976d2",
+    },
+    hintText: {
+      fontSize: '12px'
+    },
   }
 });

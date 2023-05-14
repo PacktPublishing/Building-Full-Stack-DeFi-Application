@@ -14,6 +14,8 @@ async function main() {
     // "Contract Name", "Contract Factory Name"
     ["Simple DeFi Token", "SimpleDeFiToken"],
     ["Meme Token", "MemeToken"],
+    ["Foo Token", "FooToken"],
+    ["Bar Token", "BarToken"],
     ["Pair Factory", "PairFactory"],
     ["AMM Router", "AMMRouter"], // AMMRouter must come after PairFactory
   ];
