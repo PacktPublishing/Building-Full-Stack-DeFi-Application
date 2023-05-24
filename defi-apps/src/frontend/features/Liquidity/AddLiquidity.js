@@ -81,10 +81,10 @@ const AddLiquidity = () => {
     try {
       const _tokenA = new ethers.Contract(tokenA.address, ERC20ABI, library.getSigner());
       const _balanceA = await _tokenA.balanceOf(account);
-      setBalanceA(ethers.utils.formatUnits(_balanceA, tokenA.decimals));
+      setBalanceA(Number(ethers.utils.formatUnits(_balanceA, tokenA.decimals)));
       const _tokenB = new ethers.Contract(tokenB.address, ERC20ABI, library.getSigner());
       const _balanceB = await _tokenB.balanceOf(account);
-      setBalanceB(ethers.utils.formatUnits(_balanceB, tokenB.decimals));
+      setBalanceB(Number(ethers.utils.formatUnits(_balanceB, tokenB.decimals)));
     } catch (error) {
       toast.error(getErrorMessage(error, "Cannot get token balances!"), { toastId: 'BALANCE_0' });
       console.error(error);
@@ -98,12 +98,12 @@ const AddLiquidity = () => {
     try {
       const _tokenA = new ethers.Contract(tokenA.address, ERC20ABI, library.getSigner());
       let _allowA = await _tokenA.allowance(account, AMMRouterAddress.address);
-      _allowA = ethers.utils.formatUnits(_allowA, tokenA.decimals);
+      _allowA = Number(ethers.utils.formatUnits(_allowA, tokenA.decimals));
       setAllowAmountA(_allowA);
       setAllowA(_allowA >= amountA);
       const _tokenB = new ethers.Contract(tokenB.address, ERC20ABI, library.getSigner());
       let _allowB = await _tokenB.allowance(account, AMMRouterAddress.address);
-      _allowB = ethers.utils.formatUnits(_allowB, tokenB.decimals)
+      _allowB = Number(ethers.utils.formatUnits(_allowB, tokenB.decimals));
       setAllowAmountB(_allowB);
       setAllowB(_allowB >= amountB);
     } catch (error) {
@@ -218,11 +218,13 @@ const AddLiquidity = () => {
     return isNaN(ret) ? "N/A" : ret.toFixed(4);
   }
 
-  let sharePercent = 100 * Number(amountA) / (Number(amountA) + Number(reserveA));
-  sharePercent = isNaN(sharePercent) ? 0 : sharePercent;
+  const getSharePercent = () => {
+    let sharePercent = 100 * Number(amountA) / (Number(amountA) + Number(reserveA));
+    return isNaN(sharePercent) || sharePercent < 0.01 ? "< 0.01" : sharePercent.toFixed(2)
+  }
 
   return (active ? <Grid container>
-    < Grid item >
+    <Grid item >
       <Grid container columnGap={12}>
         <Grid item>
           <IconButton onClick={() => { navigate('..', { replace: true }) }}>
@@ -286,7 +288,7 @@ const AddLiquidity = () => {
         </Grid>
         <Grid item md={4}>
           <Grid container direction="column" alignItems="center" >
-            <Grid item><Typography>{sharePercent < 0.01 ? "< 0.01" : sharePercent.toFixed(2)} %</Typography></Grid>
+            <Grid item><Typography>{getSharePercent()} %</Typography></Grid>
             <Grid item><Typography>Share of Pool</Typography></Grid>
           </Grid>
         </Grid>

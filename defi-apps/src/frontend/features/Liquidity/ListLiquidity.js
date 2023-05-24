@@ -13,7 +13,6 @@ import FactoryAddress from '../../contracts/PairFactory-address.json';
 import { TokenPairABI } from '../../utils/TokenPairABI';
 import { getTokenInfo } from '../../utils/Helper';
 import { localProvider } from '../../components/Wallet';
-import { ERC20ABI } from '../../utils/ERC20ABI';
 
 const ListLiquidity = () => {
   const theme = useTheme();
@@ -22,9 +21,9 @@ const ListLiquidity = () => {
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [liquidity, setLiquidity] = useState([]);
-  const [lpTokenSupply, setLpTokenSupply] = useState(0);
-  const [poolA, setPoolA] = useState(0);
-  const [poolB, setPoolB] = useState(0);
+  const [sharePercent, setSharePercent] = useState(0);
+  const [pooledTokenA, setPooledTokenA] = useState(0);
+  const [pooledTokenB, setPooledTokenB] = useState(0);
 
   const getLiquidity = useCallback(async () => {
     if (!active) return;
@@ -59,14 +58,12 @@ const ListLiquidity = () => {
     setExpanded(isExpanded ? pair.pairAddress : false);
     let lpToken = new ethers.Contract(pair.pairAddress, TokenPairABI, localProvider);
     let totalSupply = await lpToken.totalSupply();
-    setLpTokenSupply(totalSupply / 10 ** 18);
+    let shareRatio = pair.balance / Number(ethers.utils.formatUnits(totalSupply, 18));
+    setSharePercent(100 * shareRatio);
 
-    let tokenA = new ethers.Contract(pair.tokenA.address, ERC20ABI, localProvider);
-    let pooledTokenA = await tokenA.balanceOf(pair.pairAddress);
-    setPoolA(pooledTokenA / 10 ** pair.tokenA.decimals);
-    let tokenB = new ethers.Contract(pair.tokenB.address, ERC20ABI, localProvider);
-    let pooledTokenB = await tokenB.balanceOf(pair.pairAddress);
-    setPoolB(pooledTokenB / 10 ** pair.tokenB.decimals);
+    let [_reserveA, _reserveB,] = await lpToken.getReserves();
+    setPooledTokenA(Number(ethers.utils.formatUnits(_reserveA, pair.tokenA.decimals)) * shareRatio);
+    setPooledTokenB(Number(ethers.utils.formatUnits(_reserveB, pair.tokenB.decimals)) * shareRatio);
   };
 
   useEffect(() => {
@@ -106,7 +103,7 @@ const ListLiquidity = () => {
                   <Typography>Pooled {item.tokenA.symbol}</Typography>
                 </Grid>
                 <Grid item>
-                  <Typography>{(poolA * item.balance / lpTokenSupply).toFixed(2)}</Typography>
+                  <Typography>{pooledTokenA.toFixed(2)}</Typography>
                 </Grid>
               </Grid>
               <Grid container justifyContent="space-between" alignItems="center">
@@ -114,14 +111,12 @@ const ListLiquidity = () => {
                   <Typography>Pooled {item.tokenB.symbol}</Typography>
                 </Grid>
                 <Grid item>
-                  <Typography>{(poolB * item.balance / lpTokenSupply).toFixed(2)}</Typography>
+                  <Typography>{pooledTokenB.toFixed(2)}</Typography>
                 </Grid>
               </Grid>
               <Grid container justifyContent="space-between" sx={{ mt: 2 }} alignItems="center">
                 <Typography>Share of pool</Typography>
-                <Typography>
-                  {(100 * item.balance / lpTokenSupply).toFixed(2) + "%"}
-                </Typography>
+                <Typography>{`${sharePercent.toFixed(2)} %`}</Typography>
               </Grid>
               <Grid container justifyContent="center" spacing={2}>
                 <Grid item xs={6}>
