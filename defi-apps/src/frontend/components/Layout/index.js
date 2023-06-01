@@ -17,6 +17,9 @@ const navItems = [{
 }, {
   title: 'Liquidity',
   link: '/liquidity'
+}, {
+  title: 'Swap',
+  link: '/swap'
 }];
 const appName = 'DeFi Application';
 

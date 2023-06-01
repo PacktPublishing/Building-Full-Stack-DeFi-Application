@@ -41,7 +41,7 @@ contract AMMRouter is IAMMRouter {
 
     // Perform getAmountOut calculation along the pairs in the path
     function getAmountsOut(uint256 amountIn, address[] memory path)
-        internal
+        public
         view
         returns (uint256[] memory amounts)
     {
@@ -63,7 +63,7 @@ contract AMMRouter is IAMMRouter {
 
     // Perform getAmountIn calculation from the pair in the end of the path
     function getAmountsIn(uint256 amountOut, address[] memory path)
-        internal
+        public
         view
         returns (uint256[] memory amounts)
     {
