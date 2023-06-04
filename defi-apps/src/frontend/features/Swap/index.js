@@ -144,12 +144,10 @@ const Swap = () => {
     }
   }, [active, checkAllowance, getBalances, graph, initGraph]);
 
-  const handleMax = tokenIndex => {
-    if (tokenIndex === indexTokenA) {
-      setAmountA(balanceA);
-    } else if (tokenIndex === indexTokenB) {
-      setAmountB(balanceB);
-    }
+  const handleMax = () => {
+    setAmountA(balanceA);
+    setTokenIndex(indexTokenA);
+    getReceivingAmount();
   }
 
   const handleChange = e => {
@@ -315,10 +313,14 @@ const Swap = () => {
           <Grid item>
             <TextField sx={{ mt: 1 }} id="tokenA" label="The amount to spend" value={amountA}
               onChange={handleChange} onBlur={() => getReceivingAmount()} />
-            <Typography sx={theme.component.hintText}>Balance: {balanceA}</Typography>
-          </Grid>
-          <Grid item>
-            <Button sx={{ mt: 3 }} onClick={() => handleMax(indexTokenA)} onBlur={() => getReceivingAmount()}>Max</Button>
+            <Grid container>
+              <Grid item>
+                <Typography sx={{ ...theme.component.hintText, mt: 0.4 }}>Balance: {balanceA}</Typography>
+              </Grid>
+              <Grid item>
+                <Button sx={{ fontSize: 12, padding: '0px' }} onClick={() => handleMax()} >Max</Button>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
         <Grid container justifyContent="center" alignItems="center">
@@ -342,21 +344,18 @@ const Swap = () => {
               onChange={handleChange} onBlur={() => getSpendingAmount()} />
             <Typography sx={theme.component.hintText}>Balance: {balanceB}</Typography>
           </Grid>
-          <Grid item>
-            <Button sx={{ mt: 3 }} onClick={() => handleMax(indexTokenB)} onBlur={() => getSpendingAmount()}>Max</Button>
-          </Grid>
         </Grid>
         <Collapse in={price > 0} sx={{ my: 2 }} >
           <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item>Price</Grid>
+            <Grid item sx={{ fontWeight: 600 }}>Price</Grid>
             <Grid item>{price.toFixed(2)} {tokenA.symbol} per {tokenB.symbol}</Grid>
           </Grid>
           <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item>Price Impact</Grid>
+            <Grid item sx={{ fontWeight: 600 }}>Price Impact</Grid>
             <Grid item>{priceImpact.toFixed(2)} %</Grid>
           </Grid>
           <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item>Path</Grid>
+            <Grid item sx={{ fontWeight: 600 }}>Path</Grid>
             <Grid item>{printSwapPath(bestPath)}</Grid>
           </Grid>
         </Collapse>
