@@ -78,6 +78,22 @@ library Helper {
         amountIn = (numerator / denominator) + 1;
     }
 
+    // Safe version of transfer
+    function safeTransfer(
+        address token,
+        address to,
+        uint256 value
+    ) internal {
+        // 0xa9059cbb = bytes4(keccak256(bytes('transfer(address,uint256)')));
+        (bool success, bytes memory data) = token.call(
+            abi.encodeWithSelector(0xa9059cbb, to, value)
+        );
+        require(
+            success && (data.length == 0 || abi.decode(data, (bool))),
+            "TransferHelper: TRANSFER_FAILED"
+        );
+    }
+
     // Safe version of transferFrom for ERC20 tokens by checking the return data
     function safeTransferFrom(
         address token,
@@ -93,5 +109,11 @@ library Helper {
             success && (data.length == 0 || abi.decode(data, (bool))),
             "TRANSFER_FROM_FAILED"
         );
+    }
+
+    // Safe version of transfering ETH to an account
+    function safeTransferETH(address to, uint256 value) internal {
+        (bool success, ) = to.call{value: value}(new bytes(0));
+        require(success, "ETH_TRANSFER_FAILED");
     }
 }

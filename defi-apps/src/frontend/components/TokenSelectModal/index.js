@@ -11,12 +11,19 @@ import {
 import ClearOutlinedIcon from "@mui/icons-material/ClearOutlined";
 import { SuppotedTokens } from "../../utils/Tokens";
 import { getTokenInfo } from '../../utils/Helper';
+import WETH from '../../contracts/WETH-address.json'
 
 const TokenSelectModal = ({ open, handleClose, selectToken }) => {
   const [tokens, setTokens] = useState([]);
 
   const getSupportedTokens = useCallback(async () => {
-    const _tokens = [];
+    // The native coin of EVM
+    const _tokens = [{
+      address: WETH.address,
+      name: 'Etheruem',
+      symbol: 'ETH',
+      decimals: 18
+    }];
     for (let address of SuppotedTokens) {
       _tokens.push(await getTokenInfo(address));
     }

@@ -7,7 +7,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { toast } from 'react-toastify';
 import { TokenPairABI } from '../../utils/TokenPairABI';
 import { ethers } from 'ethers';
-import { getTokenInfo, getErrorMessage, toString } from '../../utils/Helper';
+import { getTokenInfo, getErrorMessage, toString, isETH } from '../../utils/Helper';
 import { ERC20ABI } from '../../utils/ERC20ABI';
 import AMMRouterAddress from '../../contracts/AMMRouter-address.json';
 import AMMRouterABI from '../../contracts/AMMRouter.json';
@@ -79,12 +79,22 @@ const AddLiquidity = () => {
       return;
     }
     try {
-      const _tokenA = new ethers.Contract(tokenA.address, ERC20ABI, library.getSigner());
-      const _balanceA = await _tokenA.balanceOf(account);
-      setBalanceA(Number(ethers.utils.formatUnits(_balanceA, tokenA.decimals)));
-      const _tokenB = new ethers.Contract(tokenB.address, ERC20ABI, library.getSigner());
-      const _balanceB = await _tokenB.balanceOf(account);
-      setBalanceB(Number(ethers.utils.formatUnits(_balanceB, tokenB.decimals)));
+      if (isETH(tokenA)) {
+        const _balanceA = await library.getBalance(account);
+        setBalanceA(Number(ethers.utils.formatUnits(_balanceA)));
+      } else {
+        const _tokenA = new ethers.Contract(tokenA.address, ERC20ABI, library.getSigner());
+        const _balanceA = await _tokenA.balanceOf(account);
+        setBalanceA(Number(ethers.utils.formatUnits(_balanceA, tokenA.decimals)));
+      }
+      if (isETH(tokenB)) {
+        const _balanceB = await library.getBalance(account);
+        setBalanceB(Number(ethers.utils.formatUnits(_balanceB)));
+      } else {
+        const _tokenB = new ethers.Contract(tokenB.address, ERC20ABI, library.getSigner());
+        const _balanceB = await _tokenB.balanceOf(account);
+        setBalanceB(Number(ethers.utils.formatUnits(_balanceB, tokenB.decimals)));
+      }
     } catch (error) {
       toast.error(getErrorMessage(error, "Cannot get token balances!"), { toastId: 'BALANCE_0' });
       console.error(error);
@@ -96,16 +106,24 @@ const AddLiquidity = () => {
       return;
     }
     try {
-      const _tokenA = new ethers.Contract(tokenA.address, ERC20ABI, library.getSigner());
-      let _allowA = await _tokenA.allowance(account, AMMRouterAddress.address);
-      _allowA = Number(ethers.utils.formatUnits(_allowA, tokenA.decimals));
-      setAllowAmountA(_allowA);
-      setAllowA(_allowA >= amountA);
-      const _tokenB = new ethers.Contract(tokenB.address, ERC20ABI, library.getSigner());
-      let _allowB = await _tokenB.allowance(account, AMMRouterAddress.address);
-      _allowB = Number(ethers.utils.formatUnits(_allowB, tokenB.decimals));
-      setAllowAmountB(_allowB);
-      setAllowB(_allowB >= amountB);
+      if (isETH(tokenA)) {
+        setAllowA(true);
+      } else {
+        const _tokenA = new ethers.Contract(tokenA.address, ERC20ABI, library.getSigner());
+        let _allowA = await _tokenA.allowance(account, AMMRouterAddress.address);
+        _allowA = Number(ethers.utils.formatUnits(_allowA, tokenA.decimals));
+        setAllowAmountA(_allowA);
+        setAllowA(_allowA >= amountA);
+      }
+      if (isETH(tokenB)) {
+        setAllowB(true);
+      } else {
+        const _tokenB = new ethers.Contract(tokenB.address, ERC20ABI, library.getSigner());
+        let _allowB = await _tokenB.allowance(account, AMMRouterAddress.address);
+        _allowB = Number(ethers.utils.formatUnits(_allowB, tokenB.decimals));
+        setAllowAmountB(_allowB);
+        setAllowB(_allowB >= amountB);
+      }
     } catch (error) {
       toast.error(getErrorMessage(error, "Cannot check allowances!"));
       console.error(error);
@@ -142,8 +160,8 @@ const AddLiquidity = () => {
         setAmountB(toString(_amountB));
       }
       setAvailableBalance(tmpVal <= balanceA && _amountB <= balanceB);
-      setAllowA(allowAmountA >= tmpVal);
-      setAllowB(allowAmountB >= _amountB);
+      setAllowA(isETH(tokenA) || allowAmountA >= tmpVal);
+      setAllowB(isETH(tokenB) || allowAmountB >= _amountB);
     } else {
       setAmountB(toString(tmpVal));
       let _amountA = amountA;
@@ -152,8 +170,8 @@ const AddLiquidity = () => {
         setAmountA(toString(_amountA));
       }
       setAvailableBalance(_amountA <= balanceA && tmpVal <= balanceB);
-      setAllowA(allowAmountA >= _amountA);
-      setAllowB(allowAmountB >= tmpVal);
+      setAllowA(isETH(tokenA) || allowAmountA >= _amountA);
+      setAllowB(isETH(tokenB) || allowAmountB >= tmpVal);
     }
   }
 
@@ -182,10 +200,22 @@ const AddLiquidity = () => {
     setLoading(true);
     try {
       const ammRouter = new ethers.Contract(AMMRouterAddress.address, AMMRouterABI.abi, library.getSigner());
-      const tx = await ammRouter.addLiquidity(tokenA.address, tokenB.address,
-        ethers.utils.parseUnits(toString(amountA), tokenA.decimals),
-        ethers.utils.parseUnits(toString(amountB), tokenB.decimals),
-        0, 0, account, parseInt(new Date().getTime() / 1000) + 10);
+      const deadline = parseInt(new Date().getTime() / 1000) + 30
+      let tx;
+      if (isETH(tokenA)) {
+        tx = await ammRouter.addLiquidityETH(tokenB.address,
+          ethers.utils.parseUnits(toString(amountB), tokenB.decimals), 0, 0, account, deadline,
+          { value: ethers.utils.parseUnits(toString(amountA)) });
+      } else if (isETH(tokenB)) {
+        tx = await ammRouter.addLiquidityETH(tokenA.address,
+          ethers.utils.parseUnits(toString(amountA), tokenA.decimals), 0, 0, account, deadline,
+          { value: ethers.utils.parseUnits(toString(amountB)) });
+      } else {
+        tx = await ammRouter.addLiquidity(tokenA.address, tokenB.address,
+          ethers.utils.parseUnits(toString(amountA), tokenA.decimals),
+          ethers.utils.parseUnits(toString(amountB), tokenB.decimals),
+          0, 0, account);
+      }
       await tx.wait();
       toast.info(`Liquidity provisioning succeeded! Transaction Hash: ${tx.hash}`);
       setAmountA(0);
@@ -202,9 +232,11 @@ const AddLiquidity = () => {
   const handleSelectToken = (token) => {
     if (tokenIndex === indexTokenA && token.address !== tokenB.address) {
       setTokenA(token);
+      setAmountA(0);
       setTokenSelected(Object.keys(tokenB).length > 0);
     } else if (tokenIndex === indexTokenB && token.address !== tokenA.address) {
       setTokenB(token);
+      setAmountB(0);
       setTokenSelected(Object.keys(tokenA).length > 0);
     } else {
       toast.error("Please select a different token!");

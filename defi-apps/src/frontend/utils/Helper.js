@@ -1,6 +1,7 @@
 import { localProvider } from '../components/Wallet';
 import { ethers } from 'ethers';
 import { ERC20ABI } from './ERC20ABI';
+import WETH from '../contracts/WETH-address.json';
 
 export const getTokenInfo = async (address) => {
   let name = "Unknown", symbol = "Unknown", decimals = 18;
@@ -39,4 +40,9 @@ export const toString = x => {
     }
   }
   return x.toString();
+}
+
+// Check if a token object is ETH
+export const isETH = token => {
+  return token.address === WETH.address && token.symbol === 'ETH';
 }

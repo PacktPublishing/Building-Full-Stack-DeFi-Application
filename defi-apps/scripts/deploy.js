@@ -16,19 +16,25 @@ async function main() {
     ["Meme Token", "MemeToken"],
     ["Foo Token", "FooToken"],
     ["Bar Token", "BarToken"],
+    ["Wrapped ETH", "WETH"],
     ["Pair Factory", "PairFactory"],
-    ["AMM Router", "AMMRouter"], // AMMRouter must come after PairFactory
+    ["AMM Router", "AMMRouter"], // AMMRouter must come after PairFactory and WETH
   ];
 
   let pairFactoryAddress;
+  let wethAddress;
 
   // Deploying the smart contracts and save contracts to frontend
   for (const [name, factory] of contractList) {
     let contractFactory = await ethers.getContractFactory(factory);
-    let contract = factory === "AMMRouter" ? await contractFactory.deploy(pairFactoryAddress) : await contractFactory.deploy();
+    let contract = factory === "AMMRouter" ?
+      await contractFactory.deploy(pairFactoryAddress, wethAddress) :
+      await contractFactory.deploy();
     console.log(`${name} Contract Address:`, contract.address);
     if (factory === "PairFactory") {
       pairFactoryAddress = contract.address;
+    } else if (factory === "WETH") {
+      wethAddress = contract.address;
     }
     saveContractToFrontend(contract, factory);
   }

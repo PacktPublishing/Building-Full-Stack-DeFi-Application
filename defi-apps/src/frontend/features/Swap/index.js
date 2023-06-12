@@ -14,8 +14,14 @@ import FactoryABI from '../../contracts/PairFactory.json';
 import FactoryAddress from '../../contracts/PairFactory-address.json';
 import { localProvider } from '../../components/Wallet';
 import { TokenPairABI } from '../../utils/TokenPairABI';
-import { getErrorMessage, getTokenInfo, toString } from '../../utils/Helper';
+import { getErrorMessage, getTokenInfo, toString, isETH } from '../../utils/Helper';
 import { ERC20ABI } from '../../utils/ERC20ABI';
+import WETH from '../../contracts/WETH-address.json';
+import WETHABI from '../../contracts/WETH.json';
+
+const MODE_SWAP = 0;
+const MODE_WRAP = 1;
+const MODE_UNWRAP = 2;
 
 const Swap = () => {
   const theme = useTheme();
@@ -38,25 +44,37 @@ const Swap = () => {
   const [indexTokenA, indexTokenB] = [0, 1];
   const [graph, setGraph] = useState(false);
   const [tokensSelected, setTokensSelected] = useState(false);
+  const [swapMode, setSwapMode] = useState(0);
 
   const selectToken = (_tokenA, _tokenB) => {
     if (Object.keys(_tokenA).length > 0 && Object.keys(_tokenB).length > 0) {
       const resetToken = () => {
+        setTokensSelected(false);
         tokenIndex === indexTokenA ? setTokenA({}) : setTokenB({});
       }
       if (_tokenA.address === _tokenB.address) {
-        resetToken();
-        toast.error('The selected tokens are identical, please select another token!');
-        return;
+        if (_tokenA.address === WETH.address && _tokenA.symbol !== _tokenB.symbol) {
+          if (isETH(_tokenA)) {
+            setSwapMode(MODE_WRAP);
+          } else {
+            setSwapMode(MODE_UNWRAP);
+          }
+        } else {
+          resetToken();
+          toast.error('The selected tokens are identical, please select another token!');
+          return;
+        }
+      } else {
+        // Check if there is a path between token A and token B
+        const _paths = findAllPaths(_tokenA.address, _tokenB.address, graph);
+        if (_paths.length <= 0) {
+          resetToken();
+          toast.error(`There is no swap path from ${_tokenA.symbol} to ${_tokenB.symbol}!`);
+          return;
+        }
+        setSwapMode(MODE_SWAP);
+        setPaths(_paths);
       }
-      // Check if there is a path between token A and token B
-      const _paths = findAllPaths(_tokenA.address, _tokenB.address, graph);
-      if (_paths.length <= 0) {
-        resetToken();
-        toast.error(`There is no swap path from ${_tokenA.symbol} to ${_tokenB.symbol}!`);
-        return;
-      }
-      setPaths(_paths);
     }
     setTokenA(_tokenA);
     setTokenB(_tokenB);
@@ -103,7 +121,7 @@ const Swap = () => {
   }, []);
 
   const checkAllowance = useCallback(async () => {
-    if (!tokensSelected) {
+    if (!tokensSelected || isETH(tokenA)) {
       return;
     }
     try {
@@ -122,12 +140,22 @@ const Swap = () => {
       return;
     }
     try {
-      const _tokenA = new ethers.Contract(tokenA.address, ERC20ABI, library.getSigner());
-      const _balanceA = await _tokenA.balanceOf(account);
-      setBalanceA(Number(ethers.utils.formatUnits(_balanceA, tokenA.decimals)));
-      const _tokenB = new ethers.Contract(tokenB.address, ERC20ABI, library.getSigner());
-      const _balanceB = await _tokenB.balanceOf(account);
-      setBalanceB(Number(ethers.utils.formatUnits(_balanceB, tokenB.decimals)));
+      if (isETH(tokenA)) {
+        const _balanceA = await library.getBalance(account);
+        setBalanceA(Number(ethers.utils.formatUnits(_balanceA)));
+      } else {
+        const _tokenA = new ethers.Contract(tokenA.address, ERC20ABI, library.getSigner());
+        const _balanceA = await _tokenA.balanceOf(account);
+        setBalanceA(Number(ethers.utils.formatUnits(_balanceA, tokenA.decimals)));
+      }
+      if (isETH(tokenB)) {
+        const _balanceB = await library.getBalance(account);
+        setBalanceB(Number(ethers.utils.formatUnits(_balanceB)));
+      } else {
+        const _tokenB = new ethers.Contract(tokenB.address, ERC20ABI, library.getSigner());
+        const _balanceB = await _tokenB.balanceOf(account);
+        setBalanceB(Number(ethers.utils.formatUnits(_balanceB, tokenB.decimals)));
+      }
     } catch (error) {
       toast.error(getErrorMessage(error, "Cannot get token balances!"), { toastId: 'BALANCE_0' });
       console.error(error);
@@ -135,19 +163,23 @@ const Swap = () => {
   }, [account, library, tokenA, tokenB, tokensSelected]);
 
   useEffect(() => {
-    if (!graph) {
+    if (!graph && swapMode === MODE_SWAP) {
       initGraph();
     }
     if (active) {
       checkAllowance();
       getBalances();
     }
-  }, [active, checkAllowance, getBalances, graph, initGraph]);
+  }, [active, checkAllowance, getBalances, graph, initGraph, swapMode]);
 
   const handleMax = () => {
     setAmountA(balanceA);
     setTokenIndex(indexTokenA);
-    getReceivingAmount();
+    if (swapMode === MODE_SWAP) {
+      getReceivingAmount(balanceA);
+    } else {
+      setAmountB(balanceA);
+    }
   }
 
   const handleChange = e => {
@@ -160,15 +192,23 @@ const Swap = () => {
     }
     if (id === 'tokenA') {
       setAmountA(tmpVal);
+      if (swapMode !== MODE_SWAP) {
+        setAmountB(tmpVal);
+      }
       setTokenIndex(indexTokenA);
     } else if (id === 'tokenB') {
       setAmountB(tmpVal);
+      if (swapMode !== MODE_SWAP) {
+        setAmountA(tmpVal);
+      }
       setTokenIndex(indexTokenB);
     }
   }
 
-  const getReceivingAmount = async () => {
-    if (amountA <= 0) {
+  const getReceivingAmount = async (amount) => {
+    // amount is used for handleMax()
+    amount = amount > 0 ? amount : amountA;
+    if (amount <= 0) {
       return;
     }
     setLoading(true);
@@ -177,7 +217,7 @@ const Swap = () => {
       let max = Number.MIN_SAFE_INTEGER;
       let _bestPath = null;
       for (const path of paths) {
-        const _amount = ethers.utils.parseUnits(toString(amountA), tokenA.decimals);
+        const _amount = ethers.utils.parseUnits(toString(amount), tokenA.decimals);
         const amounts = await ammRouter.getAmountsOut(_amount, path);
         const _amountB = Number(ethers.utils.formatUnits(amounts[amounts.length - 1], tokenB.decimals));
         if (_amountB > max) {
@@ -187,7 +227,7 @@ const Swap = () => {
       }
       setAmountB(max);
       setBestPath(_bestPath);
-      const newPrice = amountA / max;
+      const newPrice = amount / max;
       setPrice(newPrice);
       estimatePriceImpact(ammRouter, _bestPath, newPrice);
     } catch (error) {
@@ -228,10 +268,10 @@ const Swap = () => {
   }
 
   const printSwapPath = (path) => {
-    if (!path || path.length < 2) {
-      return;
-    }
     let result = '';
+    if (!path || path.length < 2) {
+      return result;
+    }
     for (const address of path) {
       result += ` => ${graph.get(address).token.symbol}`;
     }
@@ -268,17 +308,43 @@ const Swap = () => {
     setLoading(true);
     try {
       const ammRouter = new ethers.Contract(AMMRouterAddress.address, AMMRouterABI.abi, library.getSigner());
-      const deadline = parseInt(new Date().getTime() / 1000) + 10;
-      const tx = await (tokenIndex === indexTokenA ?
-        ammRouter.swapExactTokensForTokens(
-          ethers.utils.parseUnits(toString(amountA), tokenA.decimals),
-          ethers.utils.parseUnits(toString(amountB * 0.9), tokenB.decimals),  // Min acceptable receiving amount
-          bestPath, account, deadline) :
-        ammRouter.swapTokensForExactTokens(
-          ethers.utils.parseUnits(toString(amountB), tokenB.decimals),
-          ethers.utils.parseUnits(toString(amountA * 1.1), tokenA.decimals),  // Max acceptable spending amount
-          bestPath, account, deadline
-        ));
+      const deadline = parseInt(new Date().getTime() / 1000) + 30;
+      let tx;
+      if (isETH(tokenA)) {
+        tx = await (tokenIndex === indexTokenA ?
+          ammRouter.swapExactETHForTokens(
+            ethers.utils.parseUnits(toString(amountB * 0.9), tokenB.decimals),
+            bestPath, account, deadline, {
+            value: ethers.utils.parseUnits(toString(amountA), tokenA.decimals)
+          }) :
+          ammRouter.swapETHForExactTokens(
+            ethers.utils.parseUnits(toString(amountB), tokenB.decimals),
+            bestPath, account, deadline, {
+            value: ethers.utils.parseUnits(toString(amountA * 1.1), tokenA.decimals)
+          }));
+      } else if (isETH(tokenB)) {
+        tx = await (tokenIndex === indexTokenA ?
+          ammRouter.swapExactTokensForETH(
+            ethers.utils.parseUnits(toString(amountA), tokenA.decimals),
+            ethers.utils.parseUnits(toString(amountB * 0.9), tokenB.decimals),
+            bestPath, account, deadline) :
+          ammRouter.swapTokensForExactETH(
+            ethers.utils.parseUnits(toString(amountB), tokenB.decimals),
+            ethers.utils.parseUnits(toString(amountA * 1.1), tokenA.decimals),
+            bestPath, account, deadline
+          ));
+      } else {
+        tx = await (tokenIndex === indexTokenA ?
+          ammRouter.swapExactTokensForTokens(
+            ethers.utils.parseUnits(toString(amountA), tokenA.decimals),
+            ethers.utils.parseUnits(toString(amountB * 0.9), tokenB.decimals),  // Min acceptable receiving amount
+            bestPath, account, deadline) :
+          ammRouter.swapTokensForExactTokens(
+            ethers.utils.parseUnits(toString(amountB), tokenB.decimals),
+            ethers.utils.parseUnits(toString(amountA * 1.1), tokenA.decimals),  // Max acceptable spending amount
+            bestPath, account, deadline
+          ));
+      }
       await tx.wait();
       toast.info(`Swap succeeded! Transaction Hash: ${tx.hash}`)
       setAmountA(0);
@@ -287,6 +353,26 @@ const Swap = () => {
       await checkAllowance();
     } catch (error) {
       toast.error(getErrorMessage(error, 'Cannot perform swap!'));
+      console.error(error);
+    }
+    setLoading(false);
+  }
+
+  const handleWrap = async () => {
+    setLoading(true);
+    try {
+      const contract = new ethers.Contract(WETH.address, WETHABI.abi, library.getSigner());
+      const tx = await (swapMode === MODE_WRAP ?
+        contract.deposit({ value: ethers.utils.parseUnits(toString(amountA)) }) :
+        contract.withdraw(ethers.utils.parseUnits(toString(amountA))));
+      await tx.wait();
+      toast.info(`${swapMode === MODE_WRAP ? "wrap" : "unwrap"} succeeded! Transaction Hash: ${tx.hash}`);
+      setAmountA(0);
+      setAmountB(0);
+      await getBalances();
+    } catch (error) {
+      toast.error(getErrorMessage(error,
+        `Cannot perform ${swapMode === MODE_WRAP ? "wrap" : "unwrap"} !`));
       console.error(error);
     }
     setLoading(false);
@@ -312,7 +398,7 @@ const Swap = () => {
           </Grid>
           <Grid item>
             <TextField sx={{ mt: 1 }} id="tokenA" label="The amount to spend" value={amountA}
-              onChange={handleChange} onBlur={() => getReceivingAmount()} />
+              onChange={handleChange} onBlur={() => swapMode === MODE_SWAP && getReceivingAmount()} />
             <Grid container>
               <Grid item>
                 <Typography sx={{ ...theme.component.hintText, mt: 0.4 }}>Balance: {balanceA}</Typography>
@@ -341,32 +427,39 @@ const Swap = () => {
           </Grid>
           <Grid item>
             <TextField sx={{ mt: 1 }} id="tokenB" label="The amount to receive" value={amountB}
-              onChange={handleChange} onBlur={() => getSpendingAmount()} />
+              onChange={handleChange} onBlur={() => swapMode === MODE_SWAP && getSpendingAmount()} />
             <Typography sx={theme.component.hintText}>Balance: {balanceB}</Typography>
           </Grid>
         </Grid>
-        <Collapse in={price > 0} sx={{ my: 2 }} >
-          <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item sx={{ fontWeight: 600 }}>Price</Grid>
-            <Grid item>{price.toFixed(2)} {tokenA.symbol} per {tokenB.symbol}</Grid>
-          </Grid>
-          <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item sx={{ fontWeight: 600 }}>Price Impact</Grid>
-            <Grid item>{priceImpact.toFixed(2)} %</Grid>
-          </Grid>
-          <Grid container justifyContent="space-between" alignItems="center">
-            <Grid item sx={{ fontWeight: 600 }}>Path</Grid>
-            <Grid item>{printSwapPath(bestPath)}</Grid>
-          </Grid>
+        <Collapse in={price > 0 || swapMode !== MODE_SWAP} sx={{ my: 2 }} >
+          {swapMode === MODE_SWAP ? <>
+            <Grid container justifyContent="space-between" alignItems="center">
+              <Grid item sx={{ fontWeight: 600 }}>Price</Grid>
+              <Grid item>{price.toFixed(2)} {tokenA.symbol} per {tokenB.symbol}</Grid>
+            </Grid>
+            <Grid container justifyContent="space-between" alignItems="center">
+              <Grid item sx={{ fontWeight: 600 }}>Price Impact</Grid>
+              <Grid item>{priceImpact.toFixed(2)} %</Grid>
+            </Grid>
+            <Grid container justifyContent="space-between" alignItems="center">
+              <Grid item sx={{ fontWeight: 600 }}>Path</Grid>
+              <Grid item>{printSwapPath(bestPath)}</Grid>
+            </Grid>
+          </> : <Typography>
+            The exchange rate from {swapMode === MODE_WRAP ? "ETH to WETH" : "WETH to ETH"} is always 1:1
+          </Typography>}
         </Collapse>
         <Grid container justifyContent="center" alignItems="center">
           {active ? <Grid item xs={12}>
-            {allowAmount < amountA ? <Button sx={theme.component.primaryButton} fullWidth onClick={() => handleApprove()}>
-              {loading ? <CircularProgress sx={{ color: 'white' }} /> : `Enable ${tokenA.symbol}`}
-            </Button> : <Button disabled={amountA <= 0 || amountB <= 0 || balanceA < amountA || loading}
-              fullWidth sx={theme.component.primaryButton} onClick={() => handleSwap()}>
-              {loading ? <CircularProgress sx={{ color: 'white' }} /> : (balanceA < amountA ? "Insufficient Balance" : "Swap")}
-            </Button>}
+            {allowAmount < amountA && swapMode === MODE_SWAP && !isETH(tokenA) ?
+              <Button sx={theme.component.primaryButton} fullWidth onClick={() => handleApprove()}>
+                {loading ? <CircularProgress sx={{ color: 'white' }} /> : `Enable ${tokenA.symbol}`}
+              </Button> : <Button disabled={amountA <= 0 || amountB <= 0 || balanceA < amountA || loading}
+                fullWidth sx={theme.component.primaryButton} onClick={() => swapMode === MODE_SWAP ? handleSwap() : handleWrap()}>
+                {loading ? <CircularProgress sx={{ color: 'white' }} /> : (
+                  balanceA < amountA ? "Insufficient Balance" : (swapMode === MODE_SWAP ? "Swap" :
+                    (swapMode === MODE_WRAP ? "Wrap" : "Unwrap")))}
+              </Button>}
           </Grid> : <Typography>Please connect wallet to swap!</Typography>}
         </Grid>
       </Grid>
