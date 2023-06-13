@@ -9,7 +9,7 @@ import { TokenPairABI } from '../../utils/TokenPairABI';
 import AMMRouterAddress from '../../contracts/AMMRouter-address.json';
 import AMMRouterABI from '../../contracts/AMMRouter.json';
 import { ethers } from 'ethers';
-import { getErrorMessage, getTokenInfo, toString } from '../../utils/Helper';
+import { getErrorMessage, getTokenInfo, toString, isETH } from '../../utils/Helper';
 
 const RemoveLiquidity = () => {
   const [searchParam,] = useSearchParams();
@@ -131,9 +131,18 @@ const RemoveLiquidity = () => {
     setLoading(true);
     try {
       const ammRouter = new ethers.Contract(AMMRouterAddress.address, AMMRouterABI.abi, library.getSigner());
-      const tx = await ammRouter.removeLiquidity(tokenA.address,
-        tokenB.address, ethers.utils.parseUnits(toString(amount)), 0, 0, account,
-        parseInt(new Date().getTime() / 1000) + 10);
+      const deadline = parseInt(new Date().getTime() / 1000) + 30;
+      let tx;
+      if (isETH(tokenA)) {
+        tx = await ammRouter.removeLiquidityETH(tokenB.address,
+          ethers.utils.parseUnits(toString(amount)), 0, 0, account, deadline);
+      } else if (isETH(tokenB)) {
+        tx = await ammRouter.removeLiquidityETH(tokenA.address,
+          ethers.utils.parseUnits(toString(amount)), 0, 0, account, deadline);
+      } else {
+        tx = await ammRouter.removeLiquidity(tokenA.address, tokenB.address,
+          ethers.utils.parseUnits(toString(amount)), 0, 0, account, deadline);
+      }
       await tx.wait();
       toast.info(`Liquidity removal succeeded! Transaction Hash: ${tx.hash}`);
       setAmount(0);

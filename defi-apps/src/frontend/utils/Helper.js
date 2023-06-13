@@ -5,6 +5,10 @@ import WETH from '../contracts/WETH-address.json';
 
 export const getTokenInfo = async (address) => {
   let name = "Unknown", symbol = "Unknown", decimals = 18;
+  if (address === WETH.address) {
+    // Shortcut for Ether
+    return { address, name: "Ether", symbol: "ETH", decimals: 18 };
+  }
   try {
     const contract = new ethers.Contract(address, ERC20ABI, localProvider);
     name = await contract.name();

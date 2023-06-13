@@ -18,7 +18,7 @@ contract AMMRouter is IAMMRouter {
         initCodeHash = IPairFactory(factory).INIT_CODE_PAIR_HASH();
     }
 
-    // Make AMMRoute can receive ETH
+    // Make AMMRouter can receive ETH
     receive() external payable {
         assert(msg.sender == WETH); // only accept ETH via fallback from the WETH contract
     }
