@@ -185,7 +185,7 @@ const AddLiquidity = () => {
       const tx = await ammRouter.addLiquidity(tokenA.address, tokenB.address,
         ethers.utils.parseUnits(toString(amountA), tokenA.decimals),
         ethers.utils.parseUnits(toString(amountB), tokenB.decimals),
-        0, 0, account, parseInt(new Date().getTime() / 1000) + 10);
+        0, 0, account, parseInt(new Date().getTime() / 1000) + 30);
       await tx.wait();
       toast.info(`Liquidity provisioning succeeded! Transaction Hash: ${tx.hash}`);
       setAmountA(0);
@@ -202,9 +202,11 @@ const AddLiquidity = () => {
   const handleSelectToken = (token) => {
     if (tokenIndex === indexTokenA && token.address !== tokenB.address) {
       setTokenA(token);
+      setAmountA(0);
       setTokenSelected(Object.keys(tokenB).length > 0);
     } else if (tokenIndex === indexTokenB && token.address !== tokenA.address) {
       setTokenB(token);
+      setAmountA(0);
       setTokenSelected(Object.keys(tokenA).length > 0);
     } else {
       toast.error("Please select a different token!");
