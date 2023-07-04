@@ -170,7 +170,7 @@ const Swap = () => {
   const getReceivingAmount = async (amount) => {
     // amount is used for handleMax()
     amount = amount > 0 ? amount : amountA;
-    if (amountA <= 0) {
+    if (amount <= 0) {
       return;
     }
     setLoading(true);
