@@ -214,7 +214,7 @@ const AddLiquidity = () => {
         tx = await ammRouter.addLiquidity(tokenA.address, tokenB.address,
           ethers.utils.parseUnits(toString(amountA), tokenA.decimals),
           ethers.utils.parseUnits(toString(amountB), tokenB.decimals),
-          0, 0, account);
+          0, 0, account, deadline);
       }
       await tx.wait();
       toast.info(`Liquidity provisioning succeeded! Transaction Hash: ${tx.hash}`);

@@ -44,7 +44,7 @@ const Swap = () => {
   const [indexTokenA, indexTokenB] = [0, 1];
   const [graph, setGraph] = useState(false);
   const [tokensSelected, setTokensSelected] = useState(false);
-  const [swapMode, setSwapMode] = useState(0);
+  const [swapMode, setSwapMode] = useState(MODE_SWAP);
 
   const selectToken = (_tokenA, _tokenB) => {
     if (Object.keys(_tokenA).length > 0 && Object.keys(_tokenB).length > 0) {

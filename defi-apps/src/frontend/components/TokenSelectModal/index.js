@@ -17,11 +17,16 @@ const TokenSelectModal = ({ open, handleClose, selectToken }) => {
   const [tokens, setTokens] = useState([]);
 
   const getSupportedTokens = useCallback(async () => {
-    // The native coin of EVM
+    // The native coin of EVM and its wrapped form
     const _tokens = [{
       address: WETH.address,
-      name: 'Etheruem',
+      name: 'Ether',
       symbol: 'ETH',
+      decimals: 18
+    }, {
+      address: WETH.address,
+      name: 'Wrapped ETH',
+      symbol: 'WETH',
       decimals: 18
     }];
     for (let address of SuppotedTokens) {
