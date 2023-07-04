@@ -133,7 +133,7 @@ const RemoveLiquidity = () => {
       const ammRouter = new ethers.Contract(AMMRouterAddress.address, AMMRouterABI.abi, library.getSigner());
       const tx = await ammRouter.removeLiquidity(tokenA.address,
         tokenB.address, ethers.utils.parseUnits(toString(amount)), 0, 0, account,
-        parseInt(new Date().getTime() / 1000) + 10);
+        parseInt(new Date().getTime() / 1000) + 30);
       await tx.wait();
       toast.info(`Liquidity removal succeeded! Transaction Hash: ${tx.hash}`);
       setAmount(0);
