@@ -206,7 +206,7 @@ const AddLiquidity = () => {
       setTokenSelected(Object.keys(tokenB).length > 0);
     } else if (tokenIndex === indexTokenB && token.address !== tokenA.address) {
       setTokenB(token);
-      setAmountA(0);
+      setAmountB(0);
       setTokenSelected(Object.keys(tokenA).length > 0);
     } else {
       toast.error("Please select a different token!");
