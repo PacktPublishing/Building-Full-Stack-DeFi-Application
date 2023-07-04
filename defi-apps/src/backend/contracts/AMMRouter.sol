@@ -7,7 +7,7 @@ import "./interfaces/ITokenPair.sol";
 import "./libraries/Helper.sol";
 
 contract AMMRouter is IAMMRouter {
-    address public factory;
+    address public immutable factory;
     bytes32 private initCodeHash;
 
     constructor(address _factory) {

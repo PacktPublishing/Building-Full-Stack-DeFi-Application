@@ -147,7 +147,7 @@ const Swap = () => {
   const handleMax = () => {
     setAmountA(balanceA);
     setTokenIndex(indexTokenA);
-    getReceivingAmount();
+    getReceivingAmount(balanceA);
   }
 
   const handleChange = e => {
@@ -167,8 +167,10 @@ const Swap = () => {
     }
   }
 
-  const getReceivingAmount = async () => {
-    if (amountA <= 0) {
+  const getReceivingAmount = async (amount) => {
+    // amount is used for handleMax()
+    amount = amount > 0 ? amount : amountA;
+    if (amount <= 0) {
       return;
     }
     setLoading(true);
@@ -177,7 +179,7 @@ const Swap = () => {
       let max = Number.MIN_SAFE_INTEGER;
       let _bestPath = null;
       for (const path of paths) {
-        const _amount = ethers.utils.parseUnits(toString(amountA), tokenA.decimals);
+        const _amount = ethers.utils.parseUnits(toString(amount), tokenA.decimals);
         const amounts = await ammRouter.getAmountsOut(_amount, path);
         const _amountB = Number(ethers.utils.formatUnits(amounts[amounts.length - 1], tokenB.decimals));
         if (_amountB > max) {
@@ -187,7 +189,7 @@ const Swap = () => {
       }
       setAmountB(max);
       setBestPath(_bestPath);
-      const newPrice = amountA / max;
+      const newPrice = amount / max;
       setPrice(newPrice);
       estimatePriceImpact(ammRouter, _bestPath, newPrice);
     } catch (error) {
@@ -228,10 +230,10 @@ const Swap = () => {
   }
 
   const printSwapPath = (path) => {
-    if (!path || path.length < 2) {
-      return;
-    }
     let result = '';
+    if (!path || path.length < 2) {
+      return result;
+    }
     for (const address of path) {
       result += ` => ${graph.get(address).token.symbol}`;
     }
@@ -268,7 +270,7 @@ const Swap = () => {
     setLoading(true);
     try {
       const ammRouter = new ethers.Contract(AMMRouterAddress.address, AMMRouterABI.abi, library.getSigner());
-      const deadline = parseInt(new Date().getTime() / 1000) + 10;
+      const deadline = parseInt(new Date().getTime() / 1000) + 30;
       const tx = await (tokenIndex === indexTokenA ?
         ammRouter.swapExactTokensForTokens(
           ethers.utils.parseUnits(toString(amountA), tokenA.decimals),
