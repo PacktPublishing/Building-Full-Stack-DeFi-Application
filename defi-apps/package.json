@@ -33,7 +33,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "npx hardhat run scripts/deploy.js --network"
+    "deploy": "npx hardhat run scripts/deploy.js --network",
+    "mine": "npx hardhat mine $npm_config_blocks --network"
   },
   "eslintConfig": {
     "extends": [

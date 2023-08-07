@@ -19,6 +19,7 @@ async function main() {
     ["Wrapped ETH", "WETH"],
     ["Pair Factory", "PairFactory"],
     ["AMM Router", "AMMRouter"], // AMMRouter must come after PairFactory and WETH
+    ["Staking Pool Manager", "StakingPoolManager"]
   ];
 
   let pairFactoryAddress;

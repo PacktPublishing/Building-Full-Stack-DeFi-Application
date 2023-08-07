@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require('dotenv').config();
+require('./scripts/mine');
 
 const GOERLI_API_URL = process.env.API_URL;
 const GOERLI_PRIVATE_KEY = process.env.PRIVATE_KEY;
