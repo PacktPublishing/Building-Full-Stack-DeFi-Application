@@ -33,6 +33,7 @@ contract StakingPool is Ownable, ReentrancyGuard {
     // The staked token
     ERC20 public stakedToken;
 
+    // The total amount of staked token, aka. share amount
     uint256 public stakedTokenSupply;
 
     // User info for staked tokens and reward debt
@@ -150,6 +151,7 @@ contract StakingPool is Ownable, ReentrancyGuard {
      */
     function stopRewards() external onlyOwner {
         rewardEndBlock = block.number;
+        emit StopRewards(rewardEndBlock);
     }
 
     /*
@@ -162,7 +164,32 @@ contract StakingPool is Ownable, ReentrancyGuard {
     }
 
     /*
-     * Return reward multiplier over the given _from and _to block number
+     * Update the reward start block and reward end block, only callable by owner
+     */
+    function updateStartAndEndBlocks(
+        uint256 _rewardStartBlock,
+        uint256 _rewardEndBlock
+    ) external onlyOwner {
+        require(block.number < rewardStartBlock, "Pool has started");
+        require(
+            _rewardStartBlock < _rewardEndBlock,
+            "New start block must be lower than new end block"
+        );
+        require(
+            block.number < _rewardStartBlock,
+            "New start block must be higher than current block"
+        );
+        rewardStartBlock = _rewardStartBlock;
+        rewardEndBlock = _rewardEndBlock;
+
+        // Set the lastRewardBlock as the new start block
+        lastRewardBlock = rewardStartBlock;
+
+        emit UpdateStartAndEndBlocks(_rewardStartBlock, _rewardEndBlock);
+    }
+
+    /*
+     * Return number of blocks for reward (the multiplier) over the given _from and _to block number
      */
     function _getMultiplier(uint256 _from, uint256 _to)
         internal

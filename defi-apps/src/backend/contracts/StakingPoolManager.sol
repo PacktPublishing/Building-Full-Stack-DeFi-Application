@@ -2,21 +2,13 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./StakingPool.sol";
 
 // Smart contract to deploy staking pools and maintain a list of staking pool
 contract StakingPoolManager {
-    using SafeERC20 for ERC20;
     address[] public stakingPools;
 
     event CreateStakingPool(address owner, address stakingPool);
-    event SupplyReward(
-        address supplier,
-        address stakingPool,
-        address rewardToken,
-        uint256 amount
-    );
 
     /*
      * Deploy a new staking pool
@@ -46,27 +38,5 @@ contract StakingPoolManager {
      */
     function getAllStakingPools() public view returns (address[] memory) {
         return stakingPools;
-    }
-
-    /*
-     * Supply reward to a staking pool
-     */
-    function supplyReward(StakingPool _stakingPool, uint256 _amount) external {
-        ERC20 rewardToken = _stakingPool.rewardToken();
-        require(
-            address(rewardToken) != address(0),
-            "Invalid ERC20 reward token for staking pool"
-        );
-        rewardToken.safeTransferFrom(
-            address(msg.sender),
-            address(_stakingPool),
-            _amount
-        );
-        emit SupplyReward(
-            msg.sender,
-            address(_stakingPool),
-            address(rewardToken),
-            _amount
-        );
     }
 }
