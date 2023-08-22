@@ -1,6 +1,9 @@
 import { localProvider } from '../components/Wallet';
 import { ethers } from 'ethers';
 import { ERC20ABI } from './ERC20ABI';
+import FactoryABI from '../contracts/PairFactory.json';
+import FactoryAddress from '../contracts/PairFactory-address.json';
+import { TokenPairABI } from './TokenPairABI';
 import WETH from '../contracts/WETH-address.json';
 
 export const getTokenInfo = async (address) => {
@@ -18,6 +21,24 @@ export const getTokenInfo = async (address) => {
     console.error(error);
   }
   return { address, name, symbol, decimals };
+}
+
+export const getLiquidityPools = async () => {
+  const pools = new Map();
+  try {
+    const factory = new ethers.Contract(FactoryAddress.address, FactoryABI.abi, localProvider);
+    const nPairs = await factory.allPairsLength();
+    for (let i = 0; i < nPairs; i++) {
+      const address = await factory.allPairs(i);
+      const tokenPair = new ethers.Contract(address, TokenPairABI, localProvider);
+      const tokenA = await getTokenInfo(await tokenPair.tokenA());
+      const tokenB = await getTokenInfo(await tokenPair.tokenB());
+      pools.set(address, { tokenA, tokenB });
+    }
+  } catch (error) {
+    console.error(error);
+  }
+  return pools;
 }
 
 export const ERROR_CODE = {
