@@ -20,6 +20,9 @@ const Withdraw = () => {
   const [loading, setLoading] = useState(false);
 
   const getStakedToken = useCallback(async (poolAddress) => {
+    if (Object.keys(stakedToken).length > 0) {
+      return;
+    }
     try {
       const stakingPool = new ethers.Contract(poolAddress, StakingPoolABI, library.getSigner());
       const _stakedToken = await getTokenInfo(await stakingPool.stakedToken());
@@ -29,7 +32,7 @@ const Withdraw = () => {
       toast.error(`Cannot get the information of staked token with staking pool address ${poolAddress}!`);
       console.error(error);
     }
-  }, [library]);
+  }, [library, stakedToken]);
 
   const getStakedAmount = useCallback(async () => {
     if (stakingPoolAddress === '') return;

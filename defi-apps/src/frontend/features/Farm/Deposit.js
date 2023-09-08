@@ -22,6 +22,9 @@ const Deposit = () => {
   const [loading, setLoading] = useState(false);
 
   const getStakedToken = useCallback(async (poolAddress) => {
+    if (Object.keys(stakedToken).length > 0) {
+      return;
+    }
     try {
       const farmingPool = new ethers.Contract(poolAddress, StakingPoolABI, library.getSigner());
       const _stakedToken = await getTokenInfo(await farmingPool.stakedToken());
@@ -31,7 +34,7 @@ const Deposit = () => {
       toast.error(`Cannot get the information of staked token with farming pool address ${poolAddress}!`);
       console.error(error);
     }
-  }, [library]);
+  }, [library, stakedToken]);
 
   const getBalance = useCallback(async () => {
     if (farmingPoolAddress === '') return;

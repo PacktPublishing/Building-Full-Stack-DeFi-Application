@@ -22,6 +22,9 @@ const Deposit = () => {
   const [loading, setLoading] = useState(false);
 
   const getStakedToken = useCallback(async (poolAddress) => {
+    if (Object.keys(stakedToken).length > 0) {
+      return;
+    }
     try {
       const stakingPool = new ethers.Contract(poolAddress, StakingPoolABI, library.getSigner());
       const _stakedToken = await getTokenInfo(await stakingPool.stakedToken());
@@ -31,7 +34,7 @@ const Deposit = () => {
       toast.error(`Cannot get the information of staked token with staking pool address ${poolAddress}!`);
       console.error(error);
     }
-  }, [library]);
+  }, [library, stakedToken]);
 
   const getBalance = useCallback(async () => {
     if (stakingPoolAddress === '') return;
@@ -148,7 +151,7 @@ const Deposit = () => {
           </Button>
         </Grid>
         <Grid item xs={6}>
-          <Button disabled={amount <= 0 || allow < amount} sx={theme.component.primaryButton} fullWidth onClick={() => handleDeposit()}>
+          <Button disabled={amount <= 0 || allow < amount || amount > balance} sx={theme.component.primaryButton} fullWidth onClick={() => handleDeposit()}>
             {allow >= amount && loading ? <CircularProgress sx={{ color: 'white' }} /> : "Deposit"}
           </Button>
         </Grid>

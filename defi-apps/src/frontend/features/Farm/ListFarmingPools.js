@@ -108,7 +108,7 @@ const ListFarmingPools = () => {
             sx={{ border: 2, my: 1 }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content">
               <Grid container spacing={2}>
-                <Grid item>Stake: {`${item.tokenA.symbol}-${item.tokenB.symbol}`}</Grid>
+                <Grid item>Stake: LP Token {`${item.tokenA.symbol}-${item.tokenB.symbol}`}</Grid>
                 <Grid item>Earn: {item.rewardToken.symbol}</Grid>
                 <Grid item>{item.rewardToken.symbol} Earned: {ethers.utils.formatUnits(item.pendingReward, item.rewardToken.decimals)}</Grid>
                 <Grid item>Total Staked: {ethers.utils.formatUnits(item.stakedTotal, item.stakedToken.decimals)}</Grid>

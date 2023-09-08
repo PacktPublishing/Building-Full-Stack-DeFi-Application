@@ -133,7 +133,7 @@ const ListStakingPools = () => {
                   </Button>
                 </Grid>
                 <Grid item md={3} xs={6}>
-                  <Button sx={theme.component.primaryButton} fullWidth disabled={currentBlock >= item.rewardEndBlock}
+                  <Button sx={theme.component.primaryButton} fullWidth
                     onClick={() => navigate(`supply?pool=${item.address}`)}>Supply Reward</Button>
                 </Grid>
               </Grid>
