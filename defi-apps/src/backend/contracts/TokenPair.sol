@@ -44,7 +44,7 @@ contract TokenPair is ITokenPair, ERC20, ReentrancyGuard {
         );
         require(
             success && (data.length == 0 || abi.decode(data, (bool))),
-            "Pancake: TRANSFER_FAILED"
+            "TRANSFER_FAILED"
         );
     }
 
