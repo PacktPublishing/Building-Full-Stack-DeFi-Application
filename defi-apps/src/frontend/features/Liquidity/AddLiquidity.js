@@ -124,7 +124,7 @@ const AddLiquidity = () => {
       getBalances();
       checkAllowances();
     }
-  }, [active, searchParam, tokensSelected, tokenA, tokenB, checkAllowances, getBalances, getReserves, setTokenInfo]);
+  }, [active, searchParam, tokensSelected, checkAllowances, getBalances, getReserves, setTokenInfo]);
 
   const handleChange = e => {
     let tmpVal = e.target.value ? e.target.value : 0;
