@@ -29,6 +29,10 @@ contract PoolConfiguration {
         uint256 _collateralRate,
         uint256 _liquiditionBonusRate
     ) {
+        require(
+            _optimalUtilizationRate < 1e18,
+            "INVALID_OPTIMAL_UTILIZIATION_RATE"
+        );
         baseBorrowRate = _baseBorrowRate;
         optimalSpan = _optimalSpan;
         excessSpan = _exceessSpan;
