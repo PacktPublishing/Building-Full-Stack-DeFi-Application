@@ -14,7 +14,7 @@ import "./interfaces/IAssetPool.sol";
  * and provides operations to deposit, withdraw, borrow, repay and liquidate for interacting with
  * these asset pools.
  */
-contract LendingPool is Ownable, IAssetPool, ReentrancyGuard {
+contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
     using SafeERC20 for ERC20;
 
     /**
