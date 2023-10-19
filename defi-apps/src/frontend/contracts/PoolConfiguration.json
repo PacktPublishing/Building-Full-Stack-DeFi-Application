@@ -1,0 +1,173 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "PoolConfiguration",
+  "sourceName": "src/backend/contracts/PoolConfiguration.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_baseBorrowRate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_optimalSpan",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_exceessSpan",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_optimalUtilizationRate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_collateralRate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_liquiditionBonusRate",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "baseBorrowRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_totalBorrows",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_totalLiquidity",
+          "type": "uint256"
+        }
+      ],
+      "name": "calculateBorrowInterestRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "collateralRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "excessSpan",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_totalBorrows",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_totalLiquidity",
+          "type": "uint256"
+        }
+      ],
+      "name": "getUtilizationRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "liquidationBonusRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "optimalSpan",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "optimalUtilizationRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b506040516103aa3803806103aa83398101604081905261002f916100b4565b670de0b6b3a764000083106100945760405162461bcd60e51b815260206004820152602160248201527f494e56414c49445f4f5054494d414c5f5554494c495a494154494f4e5f5241546044820152604560f81b606482015260840160405180910390fd5b6000959095556001939093556002919091556003556004556005556100fe565b60008060008060008060c087890312156100cd57600080fd5b865195506020870151945060408701519350606087015192506080870151915060a087015190509295509295509295565b61029d8061010d6000396000f3fe608060405234801561001057600080fd5b50600436106100885760003560e01c8063687969801161005b57806368796980146100d7578063bf386682146100e0578063dffd2b38146100e9578063e98376da146100f257600080fd5b806310b2b3b71461008d5780631a792944146100a857806345ade051146100bb57806358a6be1c146100ce575b600080fd5b61009660025481565b60405190815260200160405180910390f35b6100966100b63660046101d0565b6100fb565b6100966100c93660046101d0565b61019c565b61009660045481565b61009660015481565b61009660005481565b61009660035481565b61009660055481565b600080610108848461019c565b905060035481111561016f5760035461012990670de0b6b3a7640000610208565b6003546101369083610208565b600254610143919061021b565b61014d9190610232565b60015460005461015d9190610254565b6101679190610254565b915050610196565b60035460015461017f908361021b565b6101899190610232565b6000546101679190610254565b92915050565b600081156101c657816101b784670de0b6b3a764000061021b565b6101c19190610232565b6101c9565b60005b9392505050565b600080604083850312156101e357600080fd5b50508035926020909101359150565b634e487b7160e01b600052601160045260246000fd5b81810381811115610196576101966101f2565b8082028115828204841417610196576101966101f2565b60008261024f57634e487b7160e01b600052601260045260246000fd5b500490565b80820180821115610196576101966101f256fea2646970667358221220954751b12aaa2369a1e564c2dbc660eee02404c62d8ab4be662d85fd107ec10864736f6c63430008110033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100885760003560e01c8063687969801161005b57806368796980146100d7578063bf386682146100e0578063dffd2b38146100e9578063e98376da146100f257600080fd5b806310b2b3b71461008d5780631a792944146100a857806345ade051146100bb57806358a6be1c146100ce575b600080fd5b61009660025481565b60405190815260200160405180910390f35b6100966100b63660046101d0565b6100fb565b6100966100c93660046101d0565b61019c565b61009660045481565b61009660015481565b61009660005481565b61009660035481565b61009660055481565b600080610108848461019c565b905060035481111561016f5760035461012990670de0b6b3a7640000610208565b6003546101369083610208565b600254610143919061021b565b61014d9190610232565b60015460005461015d9190610254565b6101679190610254565b915050610196565b60035460015461017f908361021b565b6101899190610232565b6000546101679190610254565b92915050565b600081156101c657816101b784670de0b6b3a764000061021b565b6101c19190610232565b6101c9565b60005b9392505050565b600080604083850312156101e357600080fd5b50508035926020909101359150565b634e487b7160e01b600052601160045260246000fd5b81810381811115610196576101966101f2565b8082028115828204841417610196576101966101f2565b60008261024f57634e487b7160e01b600052601260045260246000fd5b500490565b80820180821115610196576101966101f256fea2646970667358221220954751b12aaa2369a1e564c2dbc660eee02404c62d8ab4be662d85fd107ec10864736f6c63430008110033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
