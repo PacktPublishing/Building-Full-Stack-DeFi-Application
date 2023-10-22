@@ -293,7 +293,7 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
         );
         lendingRate = totalLiquidity == 0
             ? 0
-            : (borrowRate * totalBorrows * (1 - reserveRate)) /
+            : (borrowRate * totalBorrows * (1e18 - reserveRate)) /
                 (totalLiquidity * 1e18);
     }
 
@@ -361,7 +361,7 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
 
     // Ceilling Division (Round up the calculation result)
     function divCeil(uint256 a, uint256 b) internal pure returns (uint256) {
-        require(b > 0, "divider must more than 0");
+        require(b > 0, "DIVIDED_BY_ZERO");
         uint256 c = a / b;
         if (a % b != 0) {
             c = c + 1;
@@ -582,12 +582,12 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
         nonReentrant
         updatePoolWithInterestAndTimestamp(_token)
     {
-        require(
-            _amount > 0 && _amount <= getAvailableLiquidity(_token),
-            "INVALID_DEPOSIT_AMOUNT"
-        );
         Pool storage pool = pools[address(_token)];
         require(pool.status == PoolStatus.ACTIVE, "INVALID_POOL_STATE");
+        require(
+            _amount > 0 && _amount <= getAvailableLiquidity(_token),
+            "INVALID_BORROW_AMOUNT"
+        );
 
         // 1. Calculate borrow share amount
         uint256 borrowShare = calculateRoundUpBorrowShareAmount(
@@ -795,11 +795,11 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
         require(userTokenData.borrowShares > 0, "USER_DID_NOT_BORROW");
 
         // 6. Calculate the liquidation amount and shares
-        uint256 maxPurchaseShares = (userTokenData.borrowShares *
+        uint256 maxLiquidateShares = (userTokenData.borrowShares *
             CLOSE_FACTOR) / 1e18;
         uint256 liquidateShares = _shares;
-        if (liquidateShares > maxPurchaseShares) {
-            liquidateShares = maxPurchaseShares;
+        if (liquidateShares > maxLiquidateShares) {
+            liquidateShares = maxLiquidateShares;
         }
         uint256 liquidateAmount = calculateRoundUpBorrowAmount(
             _token,
@@ -863,12 +863,10 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
     {
         Pool storage pool = pools[address(_token)];
         uint256 poolBalance = _token.balanceOf(address(this));
-        require(_amount <= poolBalance, "TIFI: INSUFFICIENT_BALANCE");
-        // admin can't withdraw more than pool's reserve
-        require(
-            _amount <= pool.poolReserves,
-            "TIFI: INSUFFICIENT_POOL_RESERVES"
-        );
+        // Owner can't withdraw more than pool's balance
+        require(_amount <= poolBalance, "INSUFFICIENT_BALANCE");
+        // Owner can't withdraw more than pool's reserve
+        require(_amount <= pool.poolReserves, "INSUFFICIENT_POOL_RESERVES");
         _token.safeTransfer(msg.sender, _amount);
         pool.poolReserves -= _amount;
     }

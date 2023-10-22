@@ -26,33 +26,40 @@ async function main() {
     ["Pool Configuration", "PoolConfiguration"],
   ];
 
-  let pairFactoryAddress;
-  let fooAddress;
-  let barAddress;
-  let wethAddress;
-  let ammRouerAddress;
-  let shareDeployerAddress;
-  let priceOracleAddress;
-  let poolConfAddress;
-  let assetPoolContract;
+  let pairFactory, ammRouter, fooToken, barToken, wethToken,
+    shareDeployer, priceOracle, poolConf, assetPool;
 
   // Deploying the smart contracts and save contracts to frontend
   for (const [name, factory] of contractList) {
     let contractFactory = await ethers.getContractFactory(factory);
     let contract;
     switch (factory) {
+      case "FooToken":
+        fooToken = contract = await contractFactory.deploy();
+        break;
+      case "BarToken":
+        barToken = contract = await contractFactory.deploy();
+        break;
+      case "PairFactory":
+        pairFactory = contract = await contractFactory.deploy();
+        break;
+      case "WETH":
+        wethToken = contract = await contractFactory.deploy();
+        break;
       case "AMMRouter":
-        contract = await contractFactory.deploy(pairFactoryAddress, wethAddress);
+        ammRouter = contract = await contractFactory.deploy(pairFactory.address, wethToken.address);
+        break;
+      case "AssetPoolShareDeployer":
+        shareDeployer = contract = await contractFactory.deploy();
         break;
       case "PriceOracle":
-        contract = await contractFactory.deploy(ammRouerAddress, wethAddress);
+        priceOracle = contract = await contractFactory.deploy(ammRouter.address, wethToken.address);
         break;
       case "AssetPool":
-        contract = await contractFactory.deploy(shareDeployerAddress, priceOracleAddress);
-        assetPoolContract = contract;
+        assetPool = contract = await contractFactory.deploy(shareDeployer.address, priceOracle.address);
         break;
       case "PoolConfiguration":
-        contract = await contractFactory.deploy(
+        poolConf = contract = await contractFactory.deploy(
           "10000000000000000",  // baseBorrowRate = 1%
           "90000000000000000",  // optimalSpan = 9%
           "600000000000000000", // excessSpan = 60%
@@ -65,40 +72,27 @@ async function main() {
         contract = await contractFactory.deploy();
     }
     console.log(`${name} Contract Address:`, contract.address);
-    switch (factory) {
-      case "PairFactory":
-        pairFactoryAddress = contract.address;
-        break;
-      case "WETH":
-        wethAddress = contract.address;
-        break;
-      case "AMMRouter":
-        ammRouerAddress = contract.address;
-        break;
-      case "AssetPoolShareDeployer":
-        shareDeployerAddress = contract.address;
-        break;
-      case "PriceOracle":
-        priceOracleAddress = contract.address;
-        break;
-      case "PoolConfiguration":
-        poolConfAddress = contract.address;
-        break;
-      case "FooToken":
-        fooAddress = contract.address;
-        break;
-      case "BarToken":
-        barAddress = contract.address;
-        break;
-    }
     saveContractToFrontend(contract, factory);
   }
 
-  // Create asset pools for crypto loan and set them to active (1)
-  for (let token of [fooAddress, barAddress, wethAddress]) {
-    await assetPoolContract.initPool(token, poolConfAddress);
-    await assetPoolContract.setPoolStatus(token, 1);
-    console.log(`Asset Pool for ${token} is configured`);
+  for (let token of [wethToken, fooToken, barToken]) {
+    // Set allowance of token for AMM Router
+    await token.approve(ammRouter.address, '1000000000000000000000000000');
+
+    if (token != wethToken) {
+      // Create token pair TOKEN/WETH and supply 10 TOKENs and 1 WETH as initial liquidity.
+      await ammRouter.addLiquidityETH(token.address, '10000000000000000000',
+        0, 0, deployer.address, parseInt(new Date().getTime() / 1000) + 10000,
+        { value: '1000000000000000000' });
+      console.log(`Liquidity pool for ${await token.symbol()}/WETH created`);
+    }
+
+    // Create asset pools for crypto loan and
+    await assetPool.initPool(token.address, poolConf.address);
+
+    // set them to active (1)
+    await assetPool.setPoolStatus(token.address, 1);
+    console.log(`Asset Pool for ${await token.symbol()} is configured`);
   }
 
   console.log("Deployer: ", deployer.address);
