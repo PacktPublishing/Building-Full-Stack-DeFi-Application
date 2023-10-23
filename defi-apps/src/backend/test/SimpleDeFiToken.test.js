@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { toWei, fromWei } = require("./Utils");
+const { toWei } = require("./Utils");
 
 describe("SimpleDeFiToken", () => {
   let deployer, user1, user2, token;

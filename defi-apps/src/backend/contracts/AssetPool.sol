@@ -419,7 +419,7 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
     {
         Pool storage pool = pools[address(_token)];
         if (pool.totalBorrows == 0 || pool.totalBorrowShares == 0) {
-            return 0;
+            return _amount;
         }
         return divCeil(_amount * pool.totalBorrowShares, pool.totalBorrows);
     }

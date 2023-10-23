@@ -22,8 +22,8 @@ async function main() {
     ["Staking Pool Manager", "StakingPoolManager"],
     ["Asset Pool Share Deployer", "AssetPoolShareDeployer"],
     ["Price Oracle", "PriceOracle"],
-    ["Asset Pool", "AssetPool"],
     ["Pool Configuration", "PoolConfiguration"],
+    ["Asset Pool", "AssetPool"],
   ];
 
   let pairFactory, ammRouter, fooToken, barToken, wethToken,
