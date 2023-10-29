@@ -20,7 +20,11 @@ contract PriceOracle {
     function getPriceInWETH(address _token) external view returns (uint256) {
         (uint256 reserveToken, uint256 reserveWETH, ) = IAMMRouter(router)
             .getReserves(_token, WETH);
+        if (reserveToken == 0) {
+            // No reserve for the token in TOKEN/ETH
+            return 0;
+        }
         uint256 decimal = ERC20(_token).decimals();
-        return Helper.getAmountOut(10**decimal, reserveToken, reserveWETH);
+        return (10**decimal * reserveWETH) / reserveToken;
     }
 }
