@@ -20,6 +20,12 @@ const navItems = [{
 }, {
   title: 'Swap',
   link: '/swap'
+}, {
+  title: 'Stake',
+  link: '/stake'
+}, {
+  title: 'Farm',
+  link: '/farm'
 }];
 const appName = 'DeFi Application';
 
