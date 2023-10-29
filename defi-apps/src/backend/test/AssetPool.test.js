@@ -69,7 +69,7 @@ describe("AssetPool", () => {
       await assetPool.setPoolStatus(token.address, 1);
     }
 
-    // Wrap 5000 ETH for User1 and User2
+    // Wrap 1000 ETH for User1 and User2
     await wethToken.connect(user1).deposit({ value: toWei(1000) });
     await wethToken.connect(user2).deposit({ value: toWei(1000) });
   });
