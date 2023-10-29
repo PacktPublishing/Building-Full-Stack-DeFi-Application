@@ -13,10 +13,14 @@ import { SuppotedTokens } from "../../utils/Tokens";
 import { getTokenInfo } from '../../utils/Helper';
 import WETH from '../../contracts/WETH-address.json'
 
-const TokenSelectModal = ({ open, handleClose, selectToken }) => {
+const TokenSelectModal = ({ open, handleClose, selectToken, erc20Only, customTokens }) => {
   const [tokens, setTokens] = useState([]);
 
   const getSupportedTokens = useCallback(async () => {
+    if (customTokens && customTokens.length > 0) {
+      setTokens(customTokens);
+      return;
+    }
     // The native coin of EVM and its wrapped form
     const _tokens = [{
       address: WETH.address,
@@ -29,11 +33,15 @@ const TokenSelectModal = ({ open, handleClose, selectToken }) => {
       symbol: 'WETH',
       decimals: 18
     }];
+    if (erc20Only) {
+      // Remove the first element since ETH is not an ERC20 token
+      _tokens.shift();
+    }
     for (let address of SuppotedTokens) {
       _tokens.push(await getTokenInfo(address));
     }
     setTokens(_tokens);
-  }, []);
+  }, [erc20Only, customTokens]);
 
   useEffect(() => {
     getSupportedTokens();

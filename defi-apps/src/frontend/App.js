@@ -5,6 +5,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import TokenOperations from './features/TokenOperations';
 import LiquidityRouter from './features/Liquidity/LiquidityRouter';
 import Swap from './features/Swap';
+import StakeRouter from './features/Stake/StakeRouter';
+import FarmRouter from './features/Farm/FarmRouter';
 import { Web3ReactProvider } from '@web3-react/core'
 import { getLibrary } from './components/Wallet';
 import { ToastContainer } from 'react-toastify';
@@ -19,6 +21,8 @@ function App() {
           <Routes>
             <Route path='/' element={<TokenOperations />} />
             <Route path='/liquidity/*' element={<LiquidityRouter />} />
+            <Route path='/stake/*' element={<StakeRouter />} />
+            <Route path='/farm/*' element={<FarmRouter />} />
             <Route path='/swap' element={<Swap />} />
           </Routes>
         </Layout>
