@@ -6,10 +6,10 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/IAssetPool.sol";
+import "./interfaces/IPriceOracle.sol";
 import "./PoolConfiguration.sol";
 import "./AssetPoolShare.sol";
 import "./AssetPoolShareDeployer.sol";
-import "./PriceOracle.sol";
 
 /*
  * Asset Pool Smart Contract
@@ -169,7 +169,7 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
     ERC20[] public tokenList;
 
     // Price oracle to get price in native token
-    PriceOracle priceOracle;
+    IPriceOracle priceOracle;
 
     // Deployer of asset pool share tokens
     AssetPoolShareDeployer public shareDeployer;
@@ -180,8 +180,10 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
     // 5% of loan interest are reserved for owner
     uint256 public reserveRate = 0.05 * 1e18;
 
-    constructor(AssetPoolShareDeployer _shareDeployer, PriceOracle _priceOracle)
-    {
+    constructor(
+        AssetPoolShareDeployer _shareDeployer,
+        IPriceOracle _priceOracle
+    ) {
         shareDeployer = _shareDeployer;
         priceOracle = _priceOracle;
     }
@@ -197,7 +199,7 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
     }
 
     // Set the instance of price oracle, only owner can call this function
-    function setPriceOracle(PriceOracle _priceOracle) external onlyOwner {
+    function setPriceOracle(IPriceOracle _priceOracle) external onlyOwner {
         priceOracle = _priceOracle;
     }
 

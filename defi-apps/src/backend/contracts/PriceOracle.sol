@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 import "./interfaces/IAMMRouter.sol";
+import "./interfaces/IPriceOracle.sol";
 import "./libraries/Helper.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
@@ -8,7 +9,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * The simple version of price oracle based on DEX
  * NOTE: It's extreme insecure to use this smart contract, we will improve it in Chapter 13.
  */
-contract PriceOracle {
+contract PriceOracle is IPriceOracle {
     address public router;
     address public WETH;
 

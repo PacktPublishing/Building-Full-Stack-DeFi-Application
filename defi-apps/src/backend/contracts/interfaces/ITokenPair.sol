@@ -17,7 +17,7 @@ interface ITokenPair {
         uint256 amountBOut,
         address indexed to
     );
-    event Sync(uint256 reserveA, uint256 reserveB);
+    event Sync(uint112 reserveA, uint112 reserveB);
 
     function factory() external view returns (address);
 
@@ -31,9 +31,9 @@ interface ITokenPair {
         external
         view
         returns (
-            uint256 reserveA,
-            uint256 reserveB,
-            uint256 blockTimestampLast
+            uint112 reserveA,
+            uint112 reserveB,
+            uint32 blockTimestampLast
         );
 
     function mint(address to) external returns (uint256 liquidity);
@@ -53,4 +53,12 @@ interface ITokenPair {
     function sync() external;
 
     function initialize(address, address) external;
+
+    /*
+     * price0CumulativeLast and price1CumulativeLast are introduced in Uniswap V2
+     * for price oracle, check https://docs.uniswap.org/whitepaper.pdf.
+     */
+    function price0CumulativeLast() external view returns (uint256);
+
+    function price1CumulativeLast() external view returns (uint256);
 }

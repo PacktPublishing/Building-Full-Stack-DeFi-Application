@@ -21,7 +21,7 @@ async function main() {
     ["AMM Router", "AMMRouter"],
     ["Staking Pool Manager", "StakingPoolManager"],
     ["Asset Pool Share Deployer", "AssetPoolShareDeployer"],
-    ["Price Oracle", "PriceOracle"],
+    ["Price Oracle v2", "PriceOracleV2"],
     ["Pool Configuration", "PoolConfiguration"],
     ["Asset Pool", "AssetPool"],
   ];
@@ -52,8 +52,8 @@ async function main() {
       case "AssetPoolShareDeployer":
         shareDeployer = contract = await contractFactory.deploy();
         break;
-      case "PriceOracle":
-        priceOracle = contract = await contractFactory.deploy(ammRouter.address, wethToken.address);
+      case "PriceOracleV2":
+        priceOracle = contract = await contractFactory.deploy(pairFactory.address, wethToken.address, 60, 5);
         break;
       case "AssetPool":
         assetPool = contract = await contractFactory.deploy(shareDeployer.address, priceOracle.address);
