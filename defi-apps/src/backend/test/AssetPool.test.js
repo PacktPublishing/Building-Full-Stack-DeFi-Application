@@ -327,16 +327,15 @@ describe("AssetPool", () => {
     await priceOracleV2.update(barToken.address, wethToken.address);
     let barBalance = await barToken.balanceOf(user2.address);
     barPrice = await priceOracleV2.getPriceInWETH(barToken.address);
-    console.log("Price of BAR after manipulate", fromWei(barPrice));
+    console.log("Price of BAR after manipulate (Oracle v2)", fromWei(barPrice));
     barPrice = await priceOracle.getPriceInWETH(barToken.address);
-    console.log("Price of BAR Oracle v1", fromWei(barPrice));
+    console.log("Price of BAR (Oracle v1)", fromWei(barPrice));
 
     // Attacker deposits all BAR to crypto loan asset pool
     depositAmount = barBalance;
     await assetPool.connect(user2).deposit(barToken.address, depositAmount);
 
     barPrice = await priceOracleV2.getPriceInWETH(barToken.address);
-    console.log("Price of BAR before borrow", fromWei(barPrice));
     // Attacker borrows 99 WETH which is spent for manipulate the price
     await expect(assetPool.connect(user2).borrow(wethToken.address, toWei(99)))
       .to.be.revertedWith("ACCOUNT_UNHEALTHY");
