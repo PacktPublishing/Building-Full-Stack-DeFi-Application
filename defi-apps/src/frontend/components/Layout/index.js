@@ -26,6 +26,9 @@ const navItems = [{
 }, {
   title: 'Farm',
   link: '/farm'
+}, {
+  title: 'Loan',
+  link: '/loan'
 }];
 const appName = 'DeFi Application';
 

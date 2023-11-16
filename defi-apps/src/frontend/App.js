@@ -7,6 +7,7 @@ import LiquidityRouter from './features/Liquidity/LiquidityRouter';
 import Swap from './features/Swap';
 import StakeRouter from './features/Stake/StakeRouter';
 import FarmRouter from './features/Farm/FarmRouter';
+import LoanRouter from './features/Loan/LoanRouter';
 import { Web3ReactProvider } from '@web3-react/core'
 import { getLibrary } from './components/Wallet';
 import { ToastContainer } from 'react-toastify';
@@ -23,6 +24,7 @@ function App() {
             <Route path='/liquidity/*' element={<LiquidityRouter />} />
             <Route path='/stake/*' element={<StakeRouter />} />
             <Route path='/farm/*' element={<FarmRouter />} />
+            <Route path='/loan/*' element={<LoanRouter />} />
             <Route path='/swap' element={<Swap />} />
           </Routes>
         </Layout>

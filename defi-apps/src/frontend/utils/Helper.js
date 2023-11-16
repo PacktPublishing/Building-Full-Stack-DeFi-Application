@@ -71,3 +71,16 @@ export const toString = x => {
 export const isETH = token => {
   return token.address === WETH.address && token.symbol === 'ETH';
 }
+
+// Format BigNumber interst to percentage
+export const formatInterest = interest => {
+  return (Number(ethers.utils.formatEther(interest)) * 100).toFixed(2) + "%";
+}
+
+export const formatEtherOrNA = value => {
+  return value ? Number(ethers.utils.formatEther(value)).toFixed(2) : 'N/A';
+}
+
+export const boolOrNA = value => {
+  return value === undefined || value === null ? 'N/A' : value.toString();
+}

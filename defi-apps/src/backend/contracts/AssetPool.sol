@@ -191,7 +191,7 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
     /****** Price Oracle Functions ******/
 
     // Get the price of a token in WETH
-    function getPriceInWETH(address _token) internal view returns (uint256) {
+    function getPriceInWETH(address _token) public view returns (uint256) {
         return
             _token == priceOracle.WETH()
                 ? 1e18
