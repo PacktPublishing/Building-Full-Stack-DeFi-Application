@@ -23,8 +23,11 @@ const Withdraw = () => {
   const getWithdrawableBalance = useCallback(async tokenObject => {
     try {
       const assetPool = new ethers.Contract(AssetPoolAddress.address, AssetPoolABI.abi, library.getSigner());
-      const _balance = await assetPool.getUserCompoundedLiquidityBalance(account, tokenObject.address);
-      setDepositBalance(Number(ethers.utils.formatUnits(_balance, tokenObject.decimals)));
+      let _balance = await assetPool.getUserCompoundedLiquidityBalance(account, tokenObject.address);
+      _balance = Number(ethers.utils.formatUnits(_balance, tokenObject.decimals));
+      const poolInfo = await assetPool.getPool(tokenObject.address);
+      let _available = Number(ethers.utils.formatUnits(poolInfo.availableLiquidity, tokenObject.decimals));
+      setDepositBalance(Math.min(_available, _balance));
     } catch (error) {
       toast.error("Cannot get deposit balance!");
       console.error(error);
@@ -58,8 +61,7 @@ const Withdraw = () => {
     try {
       const pool = await assetPool.pools(tokenAddress);
       const shareContract = new ethers.Contract(pool.shareToken, ERC20ABI, library.getSigner());
-      const _balance = await shareContract.balanceOf(account);
-      return _balance;
+      return await shareContract.balanceOf(account);
     } catch (error) {
       toast.error("Cannot get the balance of share tokens");
       console.log(error);

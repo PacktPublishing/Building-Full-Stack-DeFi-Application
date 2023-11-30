@@ -16,10 +16,10 @@ const Borrow = () => {
   const { active, account, library } = useWeb3React();
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState({});
-  const [quota, setQuota] = useState(0);
+  const [borrowableQuota, setBorrowableQuota] = useState(0);
   const [amount, setAmount] = useState(0);
 
-  const getQuota = useCallback(async tokenObject => {
+  const getBorrowableQuota = useCallback(async tokenObject => {
     try {
       const assetPool = new ethers.Contract(AssetPoolAddress.address, AssetPoolABI.abi, library.getSigner());
       const userInfo = await assetPool.getUserInfo(account);
@@ -27,7 +27,7 @@ const Borrow = () => {
       const poolInfo = await assetPool.getPool(tokenObject.address);
       let _quota = Number(userInfo.totalCollateralValue.sub(userInfo.totalBorrowedValue).div(tokenPrice));
       let _available = Number(ethers.utils.formatUnits(poolInfo.availableLiquidity, tokenObject.decimals));
-      setQuota(Math.min(_available, _quota));
+      setBorrowableQuota(Math.min(_available, _quota));
     } catch (error) {
       toast.error("Cannot get quota for current user!");
       console.log(error);
@@ -39,13 +39,13 @@ const Borrow = () => {
     try {
       const tokenObject = await getTokenInfo(tokenAddress);
       setToken(tokenObject);
-      await getQuota(tokenObject);
+      await getBorrowableQuota(tokenObject);
     } catch (error) {
       toast.error("Failed to load information for borrowing!");
       console.log(error);
     }
     setLoading(false);
-  }, [getQuota]);
+  }, [getBorrowableQuota]);
 
   useEffect(() => {
     const tokenAddress = searchParam.get('token');
@@ -72,7 +72,7 @@ const Borrow = () => {
       await tx.wait();
       toast.info(`Token borrowed successfully! Transaction hash: ${tx.hash}`);
       setAmount(0);
-      await getQuota(token);
+      await getBorrowableQuota(token);
     } catch (error) {
       toast.error("Cannot borrow token!");
       console.error(error);
@@ -99,12 +99,12 @@ const Borrow = () => {
         </Grid>
         <Grid item xs={6}>
           <TextField label={`Please enter amount of ${token.symbol}`} value={amount} onChange={handleChange} fullWidth />
-          <Typography sx={theme.component.hintText}>Borrow Quota of {token.symbol}: {quota}</Typography>
-          <Button sx={{ fontSize: 12, padding: '0px' }} onClick={() => setAmount(quota)} >Max</Button>
+          <Typography sx={theme.component.hintText}>Borrowable Quota of {token.symbol}: {borrowableQuota}</Typography>
+          <Button sx={{ fontSize: 12, padding: '0px' }} onClick={() => setAmount(borrowableQuota)} >Max</Button>
         </Grid>
         <Grid item xs={3} />
         <Grid item xs={6}>
-          <Button disabled={amount <= 0 || amount > quota} sx={theme.component.primaryButton} fullWidth
+          <Button disabled={amount <= 0 || amount > borrowableQuota} sx={theme.component.primaryButton} fullWidth
             onClick={handleBorrow}>{loading ? <CircularProgress sx={{ color: 'white' }} /> : "Borrow"}</Button>
         </Grid>
         <Grid item xs={3} />

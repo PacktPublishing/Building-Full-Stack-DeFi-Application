@@ -137,13 +137,13 @@ const Deposit = () => {
         </Grid>
         <Grid item xs={6}>
           <Button disabled={amount <= 0 || allow >= amount} sx={theme.component.primaryButton} fullWidth onClick={handleApprove}>
-            {allow < amount && loading ? <CircularProgress sx={{ color: 'white' }} /> : "Approve"}
+            {loading ? <CircularProgress sx={{ color: 'white' }} /> : "Approve"}
           </Button>
         </Grid>
         <Grid item xs={6}>
           <Button disabled={amount <= 0 || allow < amount || amount > balance} sx={theme.component.primaryButton} fullWidth
             onClick={handleDeposit}>
-            {allow >= amount && loading ? <CircularProgress sx={{ color: 'white' }} /> : "Deposit"}
+            {loading ? <CircularProgress sx={{ color: 'white' }} /> : "Deposit"}
           </Button>
         </Grid>
       </Grid>
