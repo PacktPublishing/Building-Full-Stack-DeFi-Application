@@ -8,9 +8,17 @@ Before reading each chapter, please check if there is a branch with the name ***
 
 Once reading this chapter, you can work with the branch ***chapterXX-start*** by adding or updating the code in your local repository. If you are stucked or need references, please check the code in the branch named ***chapterXX-end*** for that chapter.
 
+Prior to running the code in the project, please make sure [node.js](https://nodejs.org/) is installed.
+
 ## Useful Commands
 
 The following commands are helpful for your to go through the examples in the book (Note, you should run these commands in current directory):
+
+Install all dependencies for the project:
+
+```shell
+npm install
+```
 
 Compile smart contracts in this project (it is helpful to verify if there are syntax error or missing dependencies):
 
@@ -45,12 +53,6 @@ Run test cases with Hardhat:
 
 ```shell
 npx hardhat test
-```
-
-Install all dependencies for the project:
-
-```shell
-npm install
 ```
 
 Start React Web UI:
