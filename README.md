@@ -3,4 +3,4 @@ Building Full-stack DeFi Application, published by Packt Publishing
 
 ## Note
 
-We highly recommend readers to clone this branch before reading chapter 2. Although there is no project here yet, you will create a project by following the instructions of chapter 2.
+Please follow the instructions in [`README.md`](https://github.com/PacktPublishing/Building-Full-stack-DeFi-Application/defi-apps/README.md) in the `defi-apps` folder.
