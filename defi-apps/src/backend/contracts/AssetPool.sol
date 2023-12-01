@@ -549,6 +549,23 @@ contract AssetPool is Ownable, IAssetPool, ReentrancyGuard {
         return totalBorrowedValue <= totalCollateralValue;
     }
 
+    // Set if a user can use the token as collateral
+    function setUserUseTokenAsCollateral(
+        address _user,
+        ERC20 _token,
+        bool _useAsCollateral
+    ) external onlyOwner {
+        UserPoolData storage userData = userPoolData[_user][address(_token)];
+        userData.disableAsCollateral = !_useAsCollateral;
+        // only disable as collateral need to check the account health
+        if (!_useAsCollateral) {
+            require(
+                isAccountHealthy(_user),
+                "can't set use as collateral, account is unhealthy."
+            );
+        }
+    }
+
     /****** Asset Pool: User Operation Functions ******/
 
     // Deposit an amount of ERC20 token to an asset pool
