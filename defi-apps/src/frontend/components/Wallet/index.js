@@ -12,12 +12,14 @@ export const getLibrary = provider => {
   return new Web3Provider(provider);
 }
 
-export const GOERLI_NETWORK_ID = 5;
+export const ETHEREUM_NETWORK_ID = 1;
+export const SEPOLIA_NETWORK_ID = 11155111;
+export const LOCAL_NETWORK_ID = 31337
 
-export const injectedConnector = new InjectedConnector({ supportedChainIds: [1, 3, 4, 5, 42, 31337] });
+export const injectedConnector = new InjectedConnector({ supportedChainIds: [ETHEREUM_NETWORK_ID, SEPOLIA_NETWORK_ID, LOCAL_NETWORK_ID] });
 
 export const walletConnectConnector = new WalletConnectConnector({
-  rpc: { [GOERLI_NETWORK_ID]: process.env.REACT_APP_API_URL },
+  rpc: { [SEPOLIA_NETWORK_ID]: process.env.REACT_APP_API_URL },
   qrcode: true,
 });
 
