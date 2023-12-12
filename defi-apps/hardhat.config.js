@@ -1,5 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
 require('dotenv').config();
+require('./scripts/mine');
 
 const SEPOLIA_API_URL = process.env.API_URL;
 const SEPOLIA_PRIVATE_KEY = process.env.PRIVATE_KEY;
