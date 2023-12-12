@@ -36,12 +36,12 @@ Deploying Smart Contracts of the project:
 
 ```shell
 npx hardhat run scripts/deploy.js --network localhost # Deploy on local EVM
-npx hardhat run scripts/deploy.js --network goerli    # Deploy on Goerli Network (TestNet)
+npx hardhat run scripts/deploy.js --network sepolia    # Deploy on Sepolia Network (TestNet)
 
 # OR
 
 npm run deploy localhost # Deploy on local EVM
-npm run deploy goerli    # Deploy on Goerli Network (TestNet)
+npm run deploy sepolia    # Deploy on Sepolia Network (TestNet)
 ```
 
 Start Hardhat console with local EVM:
@@ -59,12 +59,6 @@ Start React Web UI:
 
 ```shell
 npm start
-```
-
-If you want to simulate mining blocks on local environment, run the following command:
-
-```shell
-npm run mine localhost --npm_config_blocks 5  # Mines 5 blocks
 ```
 
 **Enjoy the exploration!**
