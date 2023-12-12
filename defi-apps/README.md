@@ -61,4 +61,10 @@ Start React Web UI:
 npm start
 ```
 
+If you want to simulate mining blocks on local environment, run the following command:
+
+```shell
+npm run mine localhost --npm_config_blocks 5  # Mines 5 blocks
+```
+
 **Enjoy the exploration!**
