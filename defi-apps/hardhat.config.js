@@ -2,8 +2,8 @@ require("@nomicfoundation/hardhat-toolbox");
 require('dotenv').config();
 require('./scripts/mine');
 
-const GOERLI_API_URL = process.env.API_URL;
-const GOERLI_PRIVATE_KEY = process.env.PRIVATE_KEY;
+const SEPOLIA_API_URL = process.env.API_URL;
+const SEPOLIA_PRIVATE_KEY = process.env.PRIVATE_KEY;
 
 module.exports = {
   solidity: {
@@ -22,9 +22,9 @@ module.exports = {
     tests: "./src/backend/test"
   },
   networks: {
-    goerli: {
-      url: GOERLI_API_URL,
-      accounts: [GOERLI_PRIVATE_KEY]
+    sepolia: {
+      url: SEPOLIA_API_URL,
+      accounts: [SEPOLIA_PRIVATE_KEY]
     }
-  },
+  }
 };
