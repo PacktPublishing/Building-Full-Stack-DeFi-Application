@@ -27,7 +27,7 @@ contract PoolConfiguration {
         uint256 _exceessSpan,
         uint256 _optimalUtilizationRate,
         uint256 _collateralRate,
-        uint256 _liquiditionBonusRate
+        uint256 _liquidationBonusRate
     ) {
         require(
             _optimalUtilizationRate < 1e18,
@@ -38,7 +38,7 @@ contract PoolConfiguration {
         excessSpan = _exceessSpan;
         optimalUtilizationRate = _optimalUtilizationRate;
         collateralRate = _collateralRate;
-        liquidationBonusRate = _liquiditionBonusRate;
+        liquidationBonusRate = _liquidationBonusRate;
     }
 
     function getUtilizationRate(uint256 _totalBorrows, uint256 _totalLiquidity)

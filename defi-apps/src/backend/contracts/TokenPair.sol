@@ -64,31 +64,31 @@ contract TokenPair is ITokenPair, ERC20, ReentrancyGuard {
     }
 
     function _update(
-        uint256 balance0,
-        uint256 balance1,
-        uint112 _reserve0,
-        uint112 _reserve1
+        uint256 balanceA,
+        uint256 balanceB,
+        uint112 _reserveA,
+        uint112 _reserveB
     ) private {
         require(
-            balance0 <= type(uint112).max && balance1 <= type(uint112).max,
+            balanceA <= type(uint112).max && balanceB <= type(uint112).max,
             "OVERFLOW"
         );
         uint32 blockTimestamp = uint32(block.timestamp % 2**32);
         // overflow is desired
         // expecting less than 2^32 seconds (~136 years) between 2 updates
         uint32 timeElapsed = blockTimestamp - blockTimestampLast;
-        if (timeElapsed > 0 && _reserve0 != 0 && _reserve1 != 0) {
+        if (timeElapsed > 0 && _reserveA != 0 && _reserveB != 0) {
             // * never overflows, and + overflow is desired
             price0CumulativeLast +=
-                uint256(UQ112x112.encode(_reserve1).uqdiv(_reserve0)) *
+                uint256(UQ112x112.encode(_reserveB).uqdiv(_reserveA)) *
                 timeElapsed;
             price1CumulativeLast +=
-                uint256(UQ112x112.encode(_reserve0).uqdiv(_reserve1)) *
+                uint256(UQ112x112.encode(_reserveA).uqdiv(_reserveB)) *
                 timeElapsed;
         }
 
-        reserveA = uint112(balance0);
-        reserveB = uint112(balance1);
+        reserveA = uint112(balanceA);
+        reserveB = uint112(balanceB);
         blockTimestampLast = blockTimestamp;
         emit Sync(reserveA, reserveB);
     }
@@ -123,10 +123,10 @@ contract TokenPair is ITokenPair, ERC20, ReentrancyGuard {
     {
         // Step 1: Calculate amounts of LP Tokens to be minted
         (uint112 _reserveA, uint112 _reserveB, ) = getReserves();
-        uint256 balance0 = IERC20(tokenA).balanceOf(address(this));
-        uint256 balance1 = IERC20(tokenB).balanceOf(address(this));
-        uint256 amountA = balance0 - _reserveA;
-        uint256 amountB = balance1 - _reserveB;
+        uint256 balanceA = IERC20(tokenA).balanceOf(address(this));
+        uint256 balanceB = IERC20(tokenB).balanceOf(address(this));
+        uint256 amountA = balanceA - _reserveA;
+        uint256 amountB = balanceB - _reserveB;
 
         bool hasReward = _mintReward(_reserveA, _reserveB);
         uint256 _totalSupply = totalSupply();
@@ -145,7 +145,7 @@ contract TokenPair is ITokenPair, ERC20, ReentrancyGuard {
         _mint(to, liquidity);
 
         // Step 3: Update the reserves
-        _update(balance0, balance1, _reserveA, _reserveB);
+        _update(balanceA, balanceB, _reserveA, _reserveB);
 
         if (hasReward) kLast = uint256(reserveA) * uint256(reserveB);
         emit Mint(msg.sender, amountA, amountB);
@@ -160,14 +160,14 @@ contract TokenPair is ITokenPair, ERC20, ReentrancyGuard {
         (uint112 _reserveA, uint112 _reserveB, ) = getReserves();
         address _tokenA = tokenA;
         address _tokenB = tokenB;
-        uint256 balance0 = IERC20(_tokenA).balanceOf(address(this));
-        uint256 balance1 = IERC20(_tokenB).balanceOf(address(this));
+        uint256 balanceA = IERC20(_tokenA).balanceOf(address(this));
+        uint256 balanceB = IERC20(_tokenB).balanceOf(address(this));
         uint256 liquidity = balanceOf(address(this));
 
         bool hasReward = _mintReward(_reserveA, _reserveB);
         uint256 _totalSupply = totalSupply();
-        amountA = (liquidity * balance0) / _totalSupply;
-        amountB = (liquidity * balance1) / _totalSupply;
+        amountA = (liquidity * balanceA) / _totalSupply;
+        amountB = (liquidity * balanceB) / _totalSupply;
         require(amountA > 0 && amountB > 0, "INSUFFICIENT_BURNING_LIQUIDITY");
 
         // Step 2: Burn the LP tokens and send paired tokens
@@ -176,9 +176,9 @@ contract TokenPair is ITokenPair, ERC20, ReentrancyGuard {
         _safeTransfer(_tokenB, to, amountB);
 
         // Step 3: Set the reserves with token balances
-        balance0 = IERC20(_tokenA).balanceOf(address(this));
-        balance1 = IERC20(_tokenB).balanceOf(address(this));
-        _update(balance0, balance1, _reserveA, _reserveB);
+        balanceA = IERC20(_tokenA).balanceOf(address(this));
+        balanceB = IERC20(_tokenB).balanceOf(address(this));
+        _update(balanceA, balanceB, _reserveA, _reserveB);
         if (hasReward) kLast = uint256(reserveA) * uint256(reserveB);
         emit Burn(msg.sender, amountA, amountB, to);
     }
@@ -203,30 +203,30 @@ contract TokenPair is ITokenPair, ERC20, ReentrancyGuard {
         if (amountBOut > 0) _safeTransfer(_tokenB, to, amountBOut);
 
         // Step 3: Verify if the input amount is sufficient
-        uint256 balance0 = IERC20(_tokenA).balanceOf(address(this));
-        uint256 balance1 = IERC20(_tokenB).balanceOf(address(this));
-        uint256 amountAIn = balance0 > _reserveA - amountAOut
-            ? balance0 - (_reserveA - amountAOut)
+        uint256 balanceA = IERC20(_tokenA).balanceOf(address(this));
+        uint256 balanceB = IERC20(_tokenB).balanceOf(address(this));
+        uint256 amountAIn = balanceA > _reserveA - amountAOut
+            ? balanceA - (_reserveA - amountAOut)
             : 0;
-        uint256 amountBIn = balance1 > _reserveB - amountBOut
-            ? balance1 - (_reserveB - amountBOut)
+        uint256 amountBIn = balanceB > _reserveB - amountBOut
+            ? balanceB - (_reserveB - amountBOut)
             : 0;
         require(amountAIn > 0 || amountBIn > 0, "INSUFFICIENT_INPUT_AMOUNT");
 
         // Step 4: Verify if the balances are sufficient for rewards
         {
             // Scope for balance{0,1}Adjusted, avoids stack to deep error.
-            uint256 balance0Adjusted = balance0 * 1000 - amountAIn * 2;
-            uint256 balance1Adjusted = balance1 * 1000 - amountBIn * 2;
+            uint256 balanceAAdjusted = balanceA * 1000 - amountAIn * 2;
+            uint256 balanceBAdjusted = balanceB * 1000 - amountBIn * 2;
             require(
-                balance0Adjusted * balance1Adjusted >=
+                balanceAAdjusted * balanceBAdjusted >=
                     uint256(reserveA) * uint256(reserveB) * 1000**2,
                 "INSUFFICIENT_LIQUIDITY"
             );
         }
 
         // Step 5: Update the reserves with token balances
-        _update(balance0, balance1, reserveA, reserveB);
+        _update(balanceA, balanceB, reserveA, reserveB);
         emit Swap(msg.sender, amountAIn, amountBIn, amountAOut, amountBOut, to);
     }
 
