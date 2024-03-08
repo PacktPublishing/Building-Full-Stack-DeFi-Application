@@ -1,5 +1,5 @@
-# Building-Full-stack-DeFi-Application
-Building Full-stack DeFi Application, published by Packt Publishing
+# Building-Full-Stack-DeFi-Application
+Building Full Stack DeFi Application, published by Packt Publishing
 
 ## Note
 
