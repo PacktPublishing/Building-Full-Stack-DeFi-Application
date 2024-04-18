@@ -14,11 +14,11 @@ Enter the world of Decentralized Finance (DeFi) with Building Full Stack DeFi Ap
 
 This book covers the following exciting features: 
 * Understand the key concepts and principles of DeFi and how it works
-Get to grips with smart contract development to solve complex problems
-Build your experience in designing, building, and deploying Web3 applications
-Implement liquidity pools and swapping features for seamless crypto exchanges
-Develop staking and farming features for DeFi applications
-Create smart contracts for crypto loans integrated with Web3 libraries
+* Get to grips with smart contract development to solve complex problems
+* Build your experience in designing, building, and deploying Web3 applications
+* Implement liquidity pools and swapping features for seamless crypto exchanges
+* Develop staking and farming features for DeFi applications
+* Create smart contracts for crypto loans integrated with Web3 libraries
 
 If you feel this book is for you, get your [copy](https://www.amazon.com/Building-Full-Stack-DeFi-Applications/dp/1837634114/ref=sr_1_1?sr=8-1) today!
 
